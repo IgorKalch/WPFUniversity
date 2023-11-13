@@ -13,10 +13,11 @@ namespace UniversityDataLayer.Extensions
         {
             services.AddDbContext<UniversityContext>(opt =>
             {
-                opt.UseSqlServer(configuration.GetConnectionString("DefaultString"));
+                var conncetionsString = configuration.GetConnectionString("DefaultString");
+                opt.UseSqlServer(conncetionsString);
             });
 
-            services.AddScoped<IUnitOfWork, UnitOfWork>(x => new UnitOfWork(x.GetRequiredService<UniversityContext>()));
+            services.AddSingleton<IUnitOfWork, UnitOfWork>(x => new UnitOfWork(x.GetRequiredService<UniversityContext>()));
         }
     }
 }

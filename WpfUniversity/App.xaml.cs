@@ -2,6 +2,10 @@
 using Microsoft.Extensions.Hosting;
 using System.Windows;
 using UniversityDataLayer.Extensions;
+using WpfUniversity.Formses;
+using WpfUniversity.Formses.Course;
+using WpfUniversity.StartUpHelpers;
+using WpfUniversity.ViewModels;
 
 namespace WpfUniversity
 {
@@ -14,8 +18,10 @@ namespace WpfUniversity
             AppHost = Host.CreateDefaultBuilder()
                 .ConfigureServices((hostContext, services) =>
                 {
+                    var configuration = hostContext.Configuration;
                     services.AddSingleton<MainWindow>();
-                    services.AddDataLayerDependencies(hostContext.Configuration);
+                    services.AddDataLayerDependencies(configuration);
+                    services.AddTransient<MainWindowViewModel>();
 
                 })
                 .Build();
@@ -23,7 +29,7 @@ namespace WpfUniversity
 
         protected override async void OnStartup(StartupEventArgs e)
         {
-            await AppHost!.RunAsync();
+            await AppHost!.StartAsync();
 
             var starupForm = AppHost!.Services.GetRequiredService<MainWindow>();
             starupForm.Show();

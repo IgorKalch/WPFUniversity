@@ -12,10 +12,12 @@ namespace UniversityDataLayer.UnitOfWorks
         private BaseRepository<Group>? _groupRepository;
         private BaseRepository<Course>? _courseRepository;
         private BaseRepository<Student>? _studentRepository;
+        private BaseRepository<Teacher>? _teacherRepository;
 
         public BaseRepository<Student> StudentRepository => _studentRepository ?? (this._studentRepository = new StudentRepositiry(_dbContext));
         public BaseRepository<Group> GroupRepository => _groupRepository ?? (this._groupRepository = new GroupRepositiry(_dbContext));
         public BaseRepository<Course> CourseRepository => _courseRepository ?? (this._courseRepository = new CourseRepository(_dbContext));
+        public BaseRepository<Teacher> TeacherRepository => _teacherRepository ?? (this._teacherRepository = new TeacherRepository(_dbContext));
 
         public UnitOfWork(UniversityContext dbContext)
         {

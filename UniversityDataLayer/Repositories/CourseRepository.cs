@@ -15,6 +15,7 @@ namespace UniversityDataLayer.Repositories
                  .Include(c => c.Groups)
                      .ThenInclude(g => g.Students)
                   .Include(t => t.Teachers)
+                     .ThenInclude(g => g.Groups)
                  .FirstOrDefault(x => x.Id == id);
 
             return course;

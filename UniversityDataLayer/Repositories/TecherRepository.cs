@@ -3,9 +3,9 @@ using UniversityDataLayer.Entities;
 
 namespace UniversityDataLayer.Repositories
 {
-    public class TecherRepository : BaseRepository<Teacher>
+    public class TeacherRepository : BaseRepository<Teacher>
     {
-        public TecherRepository(UniversityContext context) : base(context)
+        public TeacherRepository(UniversityContext context) : base(context)
         {                
         }
 

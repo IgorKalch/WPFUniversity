@@ -401,3 +401,4 @@ FodyWeavers.xsd
 .idea/
 *.sln.iml
 /University
+/WpfUniversity/StartUpHelpers

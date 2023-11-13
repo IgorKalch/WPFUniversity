@@ -4,11 +4,34 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:WpfUniversity"
-        mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800">
+        xmlns:model="clr-namespace:UniversityDataLayer.Entities;assembly=UniversityDataLayer"
+        mc:Ignorable="d" FontSize="22"
+        Title="Courses" Height="600" Width="800">
     <Grid>
-        <TextBlock HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="33">
-            Hello!
-        </TextBlock>
+        <StackPanel Orientation="Horizontal">
+            <TreeView x:Name="coursesTree" ItemsSource="{Binding Courses}" 
+                      SelectedItemChanged="coursesTree_SelectedItemChanged"
+                      MinWidth="200" Width="600">
+                <TreeView.Resources>
+                    <HierarchicalDataTemplate DataType="{x:Type model:Course}" ItemsSource="{Binding Groups}">
+                        <TextBlock Text="{Binding Name}"/>
+                    </HierarchicalDataTemplate>
+                    <HierarchicalDataTemplate DataType="{x:Type model:Group}" ItemsSource="{Binding Students}">
+                        <TextBlock Text="{Binding Name}"/>
+                    </HierarchicalDataTemplate>
+                    <HierarchicalDataTemplate DataType="{x:Type model:Student}">
+                        <TextBlock Text="{Binding FullName}"/>
+                    </HierarchicalDataTemplate>
+                </TreeView.Resources>
+
+            </TreeView>
+        </StackPanel>
+        <StackPanel HorizontalAlignment="Right" VerticalAlignment="Top"  >
+            <Button x:Name="addCourse" Margin="5" Padding="15 10" HorizontalAlignment="Left" VerticalAlignment="Top" Click="addCourse_Click" Width="180">Add Course</Button>
+            <Button x:Name="editCourse" Margin="5" Padding="15 10" HorizontalAlignment="Left" VerticalAlignment="Top" Click="editCourse_Click" Width="180">Edit Course</Button>
+            <Button x:Name="deleteCourse" Margin="5" Padding="15 10" HorizontalAlignment="Left" Click="deleteCourse_Click" Width="180">Delete Course</Button>
+        </StackPanel>
+
     </Grid>
+
 </Window>
