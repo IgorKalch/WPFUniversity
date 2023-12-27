@@ -1,6 +1,6 @@
 ﻿using System.Windows;
 
-namespace WpfUniversity.Formses
+namespace WpfUniversity.Views.Groups
 {
     public partial class GroupForm : Window
     {

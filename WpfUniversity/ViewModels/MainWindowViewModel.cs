@@ -1,18 +1,29 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
-using System.Collections.ObjectModel;
+﻿using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Windows.Input;
 using UniversityDataLayer.Entities;
 using UniversityDataLayer.UnitOfWorks;
 
 namespace WpfUniversity.ViewModels;
 
-public partial class MainWindowViewModel : ObservableObject 
+public class MainWindowViewModel : INotifyPropertyChanged
 {
     private readonly IUnitOfWork _unit;
+    private Course _selectedCourse;
 
-    [ObservableProperty]
-    ObservableCollection<Course> courses = new ObservableCollection<Course>();
+    public ObservableCollection<Course> Courses { get; set; } = new ObservableCollection<Course>();
+
+    public Course SelectedCourse
+    {
+        get { return _selectedCourse; }
+        set
+        {
+            _selectedCourse = value;
+           OnPropertyChanged(nameof(SelectedCourse));
+        }
+    }
 
     public MainWindowViewModel(IUnitOfWork unit)
     {
@@ -20,17 +31,22 @@ public partial class MainWindowViewModel : ObservableObject
         UpdateCourses();
     }
 
+    public event PropertyChangedEventHandler PropertyChanged;
+    public void OnPropertyChanged(string propertyName)
+    {
+        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+    }
+
     public void UpdateCourses()
     {
-        courses.Clear();
+        Courses.Clear();
 
         var coursesToAdd = _unit.CourseRepository.Get();
 
         foreach (var course in coursesToAdd)
         {
             var courseToadd = _unit.CourseRepository.GetById(course.Id);
-            courses.Add(courseToadd);
+            Courses.Add(courseToadd);
         }
     }
-
 }

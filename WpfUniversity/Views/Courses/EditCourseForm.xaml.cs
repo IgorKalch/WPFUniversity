@@ -3,7 +3,7 @@ using System.Windows;
 using UniversityDataLayer.Entities;
 using UniversityDataLayer.UnitOfWorks;
 
-namespace WpfUniversity.Formses.Course;
+namespace WpfUniversity.Views.Courses;
 
 public partial class EditCourseForm : Window
 {

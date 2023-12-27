@@ -47,7 +47,7 @@ namespace UniversityDataLayer.Repositories
 
         public virtual void Update(T entity)
         {
-            _dbContext.Entry(entity).State = EntityState.Modified;
+            _dbSet.Update(entity);
         }
 
         public virtual void Remove(T entity)

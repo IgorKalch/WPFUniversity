@@ -2,14 +2,12 @@
 using Microsoft.Extensions.Hosting;
 using System.Windows;
 using UniversityDataLayer.Extensions;
-using WpfUniversity.Formses;
-using WpfUniversity.Formses.Course;
-using WpfUniversity.StartUpHelpers;
-using WpfUniversity.ViewModels;
+using WpfUniversity.ViewModels.Courses;
+using MvvmCross.Platforms.Wpf.Views;
 
 namespace WpfUniversity
 {
-    public partial class App : Application
+    public partial class App : MvxApplication
     {
         public static IHost? AppHost { get; private set; }
 
@@ -21,7 +19,7 @@ namespace WpfUniversity
                     var configuration = hostContext.Configuration;
                     services.AddSingleton<MainWindow>();
                     services.AddDataLayerDependencies(configuration);
-                    services.AddTransient<MainWindowViewModel>();
+                    services.AddTransient<CourseViewModel>();
 
                 })
                 .Build();
