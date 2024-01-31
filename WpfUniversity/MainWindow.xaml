@@ -15,10 +15,10 @@
                   local:Attached.TreeViewSelectedItem="{Binding SelectedCourse, Mode=TwoWay}">
         <TreeView.Resources>
                 <HierarchicalDataTemplate DataType="{x:Type model:Course}" ItemsSource="{Binding Groups}">
-                    <TreeViewItem Header="{Binding Name}" />
+                    <TextBlock Text="{Binding Name}"/>
                 </HierarchicalDataTemplate>
                 <HierarchicalDataTemplate DataType="{x:Type model:Group}" ItemsSource="{Binding Students}">
-                    <TreeViewItem Header="{Binding Name}" />
+                    <TextBlock Text="{Binding Name}" />
                 </HierarchicalDataTemplate>
                 <HierarchicalDataTemplate DataType="{x:Type model:Student}">
                     <TextBlock Text="{Binding FullName}"/>

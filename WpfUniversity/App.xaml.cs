@@ -9,7 +9,7 @@ namespace WpfUniversity
 {
     public partial class App : MvxApplication
     {
-        public static IHost? AppHost { get; private set; }
+        public  IHost? AppHost { get; private set; }
 
         public App()
         {

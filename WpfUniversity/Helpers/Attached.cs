@@ -52,13 +52,6 @@ public class Attached
         if (parentItem == null)
             return false;
 
-        bool isExpanded = parentItem.IsExpanded;
-        if (!isExpanded)
-        {
-            parentItem.IsExpanded = true;
-            parentItem.UpdateLayout();
-        }
-
         TreeViewItem item = parentItem.ItemContainerGenerator.ContainerFromItem(o) as TreeViewItem;
         if (item != null)
         {
@@ -71,9 +64,7 @@ public class Attached
         {
             TreeViewItem itm = parentItem.ItemContainerGenerator.ContainerFromIndex(i) as TreeViewItem;
             var found = SelectItem(o, itm);
-            if (!found)
-                itm.IsExpanded = false;
-            else
+            if (found)
                 wasFound = true;
         }
 
