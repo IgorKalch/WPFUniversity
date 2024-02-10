@@ -6,7 +6,9 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
     xmlns:courseview="clr-namespace:WpfUniversity.Views.Courses" 
-    xmlns:vms="clr-namespace:WpfUniversity.ViewModels.Courses"
+    xmlns:vms="clr-namespace:WpfUniversity.ViewModels.Courses"    
+    xmlns:custom="clr-namespace:ModalControl;assembly=ModalControl" 
+    xmlns:viewmodels="clr-namespace:WpfUniversity.ViewModels" d:DataContext="{d:DesignInstance Type=viewmodels:MainWindowViewModel}"
     mc:Ignorable="d"
     FontSize="16"
     Title="Courses"
@@ -17,8 +19,11 @@
             <courseview:AddCourseView />
         </DataTemplate>
     </Window.Resources>
-    <Grid Margin="20">
-        <courseview:CourseView/>
+    <Grid>
+        <custom:Modal Panel.ZIndex="1" IsOpen="{Binding IsModalOpen}">
+            <ContentControl Margin="50 25" Content="{Binding CurrentModalViewModel}" />
+        </custom:Modal>
+        <courseview:CourseView MaxWidth="1000" Margin="25" DataContext="{Binding CourseViewModel}" />
     </Grid>
 
 </views:MvxWindow>

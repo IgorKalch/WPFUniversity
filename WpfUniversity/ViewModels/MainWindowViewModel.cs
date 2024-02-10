@@ -11,7 +11,7 @@ using WpfUniversity.ViewModels.Courses;
 
 namespace WpfUniversity.ViewModels;
 
-public class MainWindowViewModel : MvxViewModel
+public class MainWindowViewModel : ViewModelBase
 {
     private ModalNavigationService _modalNavigationService;
 
@@ -28,16 +28,16 @@ public class MainWindowViewModel : MvxViewModel
         _modalNavigationService.CurrentViewModelChanged += ModalNavigationService_CurrentViewModelChanged;
     }
 
-    public override void ViewDestroy(bool viewFinishing = true)
+    protected override void Dispose()
     {
         _modalNavigationService.CurrentViewModelChanged -= ModalNavigationService_CurrentViewModelChanged;
 
-        base.ViewDestroy(viewFinishing);
+        base.Dispose();
     }
 
     private void ModalNavigationService_CurrentViewModelChanged()
     {
-        RaisePropertyChanged(() => CurrentModalViewModel);
-        RaisePropertyChanged(() => IsModalOpen);
+        OnPropertyChanged(nameof(CurrentModalViewModel));
+        OnPropertyChanged(nameof(IsModalOpen));
     }
 }

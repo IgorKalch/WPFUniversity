@@ -22,7 +22,7 @@
 
             <TextBlock Grid.Column="0" FontSize="28" Text="Courses"/>
 
-            <Button Grid.Column="1" AutomationProperties.AutomationId="AddCourseButton" Content="Add" Command="{Binding CourseViewModel.AddCourseCommand}"/>
+            <Button Grid.Column="1" AutomationProperties.AutomationId="AddCourseButton" Content="Add" Command="{Binding AddCourseCommand}"/>
         </Grid>
 
         <Grid Grid.Row="1">
@@ -31,9 +31,9 @@
                 <ColumnDefinition Width="2*"/>
             </Grid.ColumnDefinitions>
 
-            <components:CourseTree Grid.Column="0" DataContext="{Binding CourseViewModel.CourseTreeViewModel}"/>
+            <components:CourseTree Grid.Column="0" DataContext="{Binding CourseTreeViewModel}"/>
 
-            <components:CourseDetails Margin="20 0 0 0" Grid.Column="1" DataContext="{Binding CourseViewModel.CourseDetailsViewModel}"/>
+            <components:CourseDetails Margin="20 0 0 0" Grid.Column="1" DataContext="{Binding CourseDetailsViewModel}"/>
 
         </Grid>
 

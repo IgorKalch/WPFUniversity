@@ -8,10 +8,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Page Remove="MainWindow_old.xaml" />
-  </ItemGroup>
-
-  <ItemGroup>
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="7.0.12">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
@@ -20,6 +16,7 @@
     <PackageReference Include="Microsoft.Extensions.Hosting" Version="7.0.1" />
     <PackageReference Include="MvvmCross" Version="9.1.1" />
     <PackageReference Include="MvvmCross.Platforms.Wpf" Version="9.1.1" />
+    <PackageReference Include="SimpleModal.WPF" Version="1.0.0" />
   </ItemGroup>
 
   <ItemGroup>
@@ -35,10 +32,6 @@
   <ItemGroup>
     <Folder Include="ViewModels\Students\" />
     <Folder Include="Views\Groups\" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <None Include="MainWindow_old.xaml" />
   </ItemGroup>
 
   <ItemGroup>

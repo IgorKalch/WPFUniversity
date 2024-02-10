@@ -61,7 +61,6 @@ namespace WpfUniversity
         private CourseViewModel CreateCourseViewModel(IServiceProvider services)
         {
             return CourseViewModel.LoadViewModel(
-                services.GetRequiredService<IUnitOfWork>(),
                 services.GetRequiredService<CourseService>(),
                 services.GetRequiredService<SelectedCourseService>(),
                 services.GetRequiredService<ModalNavigationService>());

@@ -18,9 +18,9 @@ namespace WpfUniversity.Components
     /// <summary>
     /// Interaction logic for CourseDetailsForm.xaml
     /// </summary>
-    public partial class CourseDetailsForm : UserControl
+    public partial class AddCourseForm : UserControl
     {
-        public CourseDetailsForm()
+        public AddCourseForm()
         {
             InitializeComponent();
         }

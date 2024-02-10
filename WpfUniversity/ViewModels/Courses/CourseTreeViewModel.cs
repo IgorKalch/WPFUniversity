@@ -17,7 +17,6 @@ namespace WpfUniversity.ViewModels.Courses
 {
     public class CourseTreeViewModel : ViewModelBase
     {
-        private readonly IUnitOfWork _unit;
         private ObservableCollection<Course> _courses = new();
         private readonly CourseService _courseService;
         private SelectedCourseService _selectedCourseService;
@@ -25,9 +24,8 @@ namespace WpfUniversity.ViewModels.Courses
 
         public ObservableCollection<Course> Courses => _courses;        
 
-        public CourseTreeViewModel(IUnitOfWork unitOfWork, CourseService courseService, SelectedCourseService selectedCourseSErvice, ModalNavigationService modalNavigationService)
+        public CourseTreeViewModel(CourseService courseService, SelectedCourseService selectedCourseSErvice, ModalNavigationService modalNavigationService)
         {
-            _unit = unitOfWork;
             _courseService = courseService;
             _selectedCourseService = selectedCourseSErvice;
             _modalNavigationService = modalNavigationService;
@@ -44,6 +42,18 @@ namespace WpfUniversity.ViewModels.Courses
             Courses.CollectionChanged += Courses_CollectionChanged;
         }
 
+        protected override void Dispose()
+        {
+            _selectedCourseService.SelectedCourseChanged -= SelectedCourseService_SelectedCourseChanged;
+
+            _courseService.CourseLoaded -= CourseService_CourseLoaded;
+            _courseService.CourseAdded -= CourseService_CourseAdded;
+            _courseService.CourseUpdated -= CourseService_Updated;
+            _courseService.CourseDeleted -= CourseService_CourseDeleted;
+
+            base.Dispose();
+        }
+
         public Course SelectedCourse
         {
             get { return _courses.Where(y => y.Id == _selectedCourseService?.SelectedCourse.Id).FirstOrDefault(); }
@@ -51,14 +61,14 @@ namespace WpfUniversity.ViewModels.Courses
                 if (_selectedCourseService != null)
                 {
                     _selectedCourseService.SelectedCourse = value;
-                    RaisePropertyChanged(() => SelectedCourse);
+                    OnPropertyChanged(nameof(SelectedCourse));
                 }
             }
         }
 
         private void SelectedCourseService_SelectedCourseChanged()
         {
-            RaisePropertyChanged(() => SelectedCourse);
+            OnPropertyChanged(nameof(SelectedCourse));
         }
 
         private void CourseService_CourseLoaded()
@@ -98,7 +108,7 @@ namespace WpfUniversity.ViewModels.Courses
 
         private void Courses_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
         {
-            RaisePropertyChanged(() => SelectedCourse);
+            OnPropertyChanged(nameof(SelectedCourse));
         }
     }
 }
