@@ -6,15 +6,10 @@ namespace WpfUniversity
 {
     public partial class MainWindow : MvxWindow
     {
-        private readonly IUnitOfWork _unitOfWork;
 
-        public MainWindow(IUnitOfWork unitOfWork) 
+        public MainWindow() 
         {
             InitializeComponent();
-
-            _unitOfWork = unitOfWork;
-
-            DataContext = new CourseViewModel(_unitOfWork);
         }
     }
 }

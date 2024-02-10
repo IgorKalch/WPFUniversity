@@ -16,11 +16,11 @@ using System.Windows.Shapes;
 namespace WpfUniversity.Views.Courses
 {
     /// <summary>
-    /// Interaction logic for CourseView.xaml
+    /// Interaction logic for AddCourseView.xaml
     /// </summary>
-    public partial class CourseView : UserControl
+    public partial class AddCourseView : UserControl
     {
-        public CourseView()
+        public AddCourseView()
         {
             InitializeComponent();
         }

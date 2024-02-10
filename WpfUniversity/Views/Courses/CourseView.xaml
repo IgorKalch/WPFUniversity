@@ -1,19 +1,41 @@
-﻿<views:MvxWpfView
-    xmlns:views="clr-namespace:MvvmCross.Platforms.Wpf.Views;assembly=MvvmCross.Platforms.Wpf"
-    xmlns:mvx="clr-namespace:MvvmCross.Platforms.Wpf.Binding;assembly=MvvmCross.Platforms.Wpf"
-    x:Class="WpfUniversity.Views.Courses.CourseView"
+﻿<UserControl x:Class="WpfUniversity.Views.Courses.CourseView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
-             xmlns:local="clr-namespace:WpfUniversity.Views.Courses"
-    mc:Ignorable="d" 
+             xmlns:components="clr-namespace:WpfUniversity.Components"
+             xmlns:local="clr-namespace:WpfUniversity.Views.Courses" 
+             xmlns:courses="clr-namespace:WpfUniversity.ViewModels.Courses" d:DataContext="{d:DesignInstance Type=courses:CourseViewModel}"
+             mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800">
     <Grid>
-        <TreeView   x:Name="coursesTree" Width="364">
-            <TreeView.Resources>
-                
-            </TreeView.Resources>
-        </TreeView>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <Grid  Grid.Row="0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="auto"/>
+            </Grid.ColumnDefinitions>
+
+            <TextBlock Grid.Column="0" FontSize="28" Text="Courses"/>
+
+            <Button Grid.Column="1" AutomationProperties.AutomationId="AddCourseButton" Content="Add" Command="{Binding CourseViewModel.AddCourseCommand}"/>
+        </Grid>
+
+        <Grid Grid.Row="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="2*"/>
+            </Grid.ColumnDefinitions>
+
+            <components:CourseTree Grid.Column="0" DataContext="{Binding CourseViewModel.CourseTreeViewModel}"/>
+
+            <components:CourseDetails Margin="20 0 0 0" Grid.Column="1" DataContext="{Binding CourseViewModel.CourseDetailsViewModel}"/>
+
+        </Grid>
+
     </Grid>
-</views:MvxWpfView>
+</UserControl>

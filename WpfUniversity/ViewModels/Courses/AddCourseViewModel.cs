@@ -1,60 +1,88 @@
-﻿using System;
-using System.Collections.ObjectModel;
-using System.Collections.Specialized;
-using System.ComponentModel;
-using System.Runtime.CompilerServices;
-using System.Windows;
+﻿using MvvmCross.Commands;
+using System;
+using System.Threading.Tasks;
+using System.Windows.Navigation;
 using UniversityDataLayer.Entities;
-using UniversityDataLayer.Migrations;
-using UniversityDataLayer.UnitOfWorks;
-using WpfUniversity.Views.Courses;
+using WpfUniversity.Services;
+using WpfUniversity.Services.Courses;
 
 namespace WpfUniversity.ViewModels.Courses;
 
-public class AddCourseViewModel : INotifyPropertyChanged
+public class AddCourseViewModel : ViewModelBase
 {
-    public event PropertyChangedEventHandler? PropertyChanged;
-    public ObservableCollection<Course> Phones { get; set; }
+    private readonly CourseService _courseService;
+    private readonly ModalNavigationService _modalNavigationService;
+    private string _name;
+    private string _description;
+    private string? _errorMessage;
+    private bool _hasErrorMessage;
+    private bool _canSubmit;
 
-    // команда добавления нового объекта
-    private RelayCommand addCommand;
-    private Course selectedPhone;
-    private readonly IUnitOfWork _unitOfWork;
-
-    public RelayCommand AddCommand
+    public string Name
     {
-        get
-        {
-            return addCommand ??
-              (addCommand = new RelayCommand(obj =>
-              {
-                  Course phone = new Course();
-                  Phones.Insert(0, phone);
-                  SelectedPhone = phone;
-              }));
-        }
-    }
-
-    public Course SelectedPhone
-    {
-        get { return selectedPhone; }
+        get { return _name; }
         set
         {
-            selectedPhone = value;
-            OnPropertyChanged("SelectedPhone");
+            SetProperty(ref _name, value);
+            SetProperty<bool>(ref _canSubmit, !string.IsNullOrEmpty(value), nameof(CanAddCourse));
+        }
+    }
+    public string Description
+    {
+        get { return _description; }
+        set
+        {
+            SetProperty(ref _description, value);
         }
     }
 
-    public AddCourseViewModel(IUnitOfWork unitOfWork)
+    public string? ErrorMessage
     {
-        _unitOfWork = unitOfWork;
-        Phones = new ObservableCollection<Course>(_unitOfWork.CourseRepository.Get());
-     
+        get { return _errorMessage; }
+        set
+        {
+            SetProperty(ref _errorMessage, value);
+            SetProperty<bool>(ref _hasErrorMessage, !string.IsNullOrEmpty(value), nameof(HasErrorMessage));
+        }
     }
 
-    public void OnPropertyChanged([CallerMemberName] string prop = "")
+    public bool HasErrorMessage
     {
-        if (PropertyChanged != null)
-            PropertyChanged(this, new PropertyChangedEventArgs(prop));
+        get { return _hasErrorMessage; }
+        set { SetProperty(ref _hasErrorMessage, value); }
+    }
+
+    public bool CanAddCourse => Name?.Length > 3;
+
+    public IMvxCommand AddCourseCommand { get; set; }
+
+    public AddCourseViewModel(CourseService courseService, ModalNavigationService modalNavigationService)
+    {
+        _courseService = courseService;
+        _modalNavigationService = modalNavigationService;
+
+        AddCourseCommand = new MvxCommand(AddCourse);
+    }
+
+    private async void AddCourse()
+    {
+        _modalNavigationService.CurrentViewModel = this;
+
+       ErrorMessage = null;
+
+        Course course = new Course();
+        course.Name = Name;
+        course.Description = Description;
+
+        try
+        {
+            await _courseService.Add(course);
+
+            _modalNavigationService.Close();
+        }
+        catch (Exception)
+        {
+            ErrorMessage = "Failed to add Course. Please try again later.";
+        }
     }
 }

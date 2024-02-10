@@ -1,86 +1,86 @@
-﻿using MvvmCross.ViewModels;
-using System.Collections.ObjectModel;
-using System.ComponentModel;
-using System.Linq;
-using System.Runtime.CompilerServices;
-using UniversityDataLayer.Entities;
-using UniversityDataLayer.Migrations;
+﻿using MvvmCross.Commands;
+using MvvmCross.ViewModels;
+using System;
 using UniversityDataLayer.UnitOfWorks;
+using WpfUniversity.Services;
+using WpfUniversity.Services.Courses;
 
 namespace WpfUniversity.ViewModels.Courses;
 
-public partial class CourseViewModel : MvxViewModel
-{
+public  class CourseViewModel : MvxViewModel
+{  
     private readonly IUnitOfWork _unit;
-    private ObservableCollection<Course> _courses = new();
-    private ObservableCollection<Group> _groups = new();
-    private ObservableCollection<Teacher> _teachers = new();
-    private string _name;
-    private string _description;
-    private Course _selectedCourse;
+    private readonly CourseService _courseService;
+    private readonly ModalNavigationService _modalNavigationService;
+    private bool _isLoading;
+    private string? _errorMessage;
+    private bool _hasErrorMessage;
 
-    public CourseViewModel( IUnitOfWork unitOfWork)
+    public CourseDetailsViewModel CourseDetailsViewModel { get;  }
+    public CourseTreeViewModel CourseTreeViewModel { get;  }
+    public AddCourseViewModel AddCourseViewModel { get; }
+
+    public IMvxCommand AddCourseCommand { get; }
+    public IMvxCommand LoadCourseCommand { get; }
+    
+    public string? ErrorMessage
+    {
+        get { return _errorMessage; }
+        set
+        {
+            SetProperty(ref _errorMessage, value);
+            SetProperty<bool>(ref _hasErrorMessage, !string.IsNullOrEmpty(value), nameof(HasErrorMessage));
+        }
+    }
+
+    public bool HasErrorMessage
+    {
+        get { return _hasErrorMessage; }
+        set { SetProperty(ref _hasErrorMessage, value); }
+    }
+    public bool IsLoading
+    {
+        get { return _isLoading; }
+        set { SetProperty(ref _isLoading, value); }
+    }
+
+
+    public CourseViewModel( IUnitOfWork unitOfWork, CourseService courseService, SelectedCourseService selectedCourseService, ModalNavigationService modalNavigationService)
     {
         _unit = unitOfWork;
-        UpdateCourses();
+        _courseService = courseService;
+        _modalNavigationService = modalNavigationService;
+
+        CourseTreeViewModel = new CourseTreeViewModel(_unit, courseService, selectedCourseService, modalNavigationService);
+        CourseDetailsViewModel = new CourseDetailsViewModel(selectedCourseService);
+        AddCourseViewModel = new AddCourseViewModel(_courseService, _modalNavigationService);
+
+        AddCourseCommand = AddCourseViewModel.AddCourseCommand;
+        LoadCourseCommand = new MvxCommand(Load);
     }
 
-    public Course SelectedCourse
+    public static CourseViewModel LoadViewModel(IUnitOfWork unitOfWork, CourseService courseService, SelectedCourseService selectedCourseService, ModalNavigationService modalNavigationService)
     {
-        get { return _selectedCourse; }
-        set { SetProperty(ref _selectedCourse, value); }
+        CourseViewModel viewModel = new CourseViewModel(unitOfWork, courseService, selectedCourseService, modalNavigationService);
+
+        viewModel.LoadCourseCommand.Execute();
+
+        return viewModel;
     }
 
-    public ObservableCollection<Course> Courses 
-    { 
-        get { return _courses; }
-        set { SetProperty(ref _courses, value); }
-    }
-    public string Name
+    private async void Load()
     {
-        get { return _name; }
-        set
+
+        ErrorMessage = null;
+        IsLoading = true;
+
+        try
         {
-            SetProperty( ref _name, value);
+            await _courseService.Load();
         }
-    }
-
-    public string Description
-    {
-        get { return _description; }
-        set
+        catch (Exception)
         {
-            SetProperty(ref _description, value);
-        }
-    }
-    public ObservableCollection<Group> Groups
-    {
-        get { return _groups; }
-        set
-        {
-            SetProperty(ref _groups, value);
-        }
-    }
-
-    public ObservableCollection<Teacher> Teachers
-    {
-        get { return _teachers; }
-        set
-        {
-            SetProperty(ref _teachers, value);
-        }
-    }
-
-    public void UpdateCourses()
-    {
-        Courses.Clear();
-
-        var coursesToAdd = _unit.CourseRepository.Get();
-
-        foreach (var course in coursesToAdd)
-        {
-            var courseToadd = _unit.CourseRepository.GetById(course.Id);
-            Courses.Add(courseToadd);
+            ErrorMessage = "Failed to load Course. Please restart the application.";
         }
     }
 }

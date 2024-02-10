@@ -13,14 +13,14 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 
-namespace WpfUniversity.Views.Courses
+namespace WpfUniversity.Components
 {
     /// <summary>
-    /// Interaction logic for CourseView.xaml
+    /// Interaction logic for CourseDetailsForm.xaml
     /// </summary>
-    public partial class CourseView : UserControl
+    public partial class CourseDetailsForm : UserControl
     {
-        public CourseView()
+        public CourseDetailsForm()
         {
             InitializeComponent();
         }

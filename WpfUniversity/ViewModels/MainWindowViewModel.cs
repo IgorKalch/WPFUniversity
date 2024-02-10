@@ -1,52 +1,43 @@
-﻿using System.Collections.ObjectModel;
+﻿using MvvmCross.ViewModels;
+using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Windows.Input;
 using UniversityDataLayer.Entities;
 using UniversityDataLayer.UnitOfWorks;
+using WpfUniversity.Services;
+using WpfUniversity.ViewModels.Courses;
 
 namespace WpfUniversity.ViewModels;
 
-public class MainWindowViewModel : INotifyPropertyChanged
+public class MainWindowViewModel : MvxViewModel
 {
-    private readonly IUnitOfWork _unit;
-    private Course _selectedCourse;
+    private ModalNavigationService _modalNavigationService;
 
-    public ObservableCollection<Course> Courses { get; set; } = new ObservableCollection<Course>();
+    public ViewModelBase CurrentModalViewModel => _modalNavigationService.CurrentViewModel;
+    public bool IsModalOpen => _modalNavigationService.IsOpen;
 
-    public Course SelectedCourse
+    public CourseViewModel CourseViewModel { get; }
+
+    public MainWindowViewModel(ModalNavigationService modalNavigationService, CourseViewModel courseViewModel)
     {
-        get { return _selectedCourse; }
-        set
-        {
-            _selectedCourse = value;
-           OnPropertyChanged(nameof(SelectedCourse));
-        }
+        _modalNavigationService = modalNavigationService;
+        CourseViewModel = courseViewModel;
+
+        _modalNavigationService.CurrentViewModelChanged += ModalNavigationService_CurrentViewModelChanged;
     }
 
-    public MainWindowViewModel(IUnitOfWork unit)
+    public override void ViewDestroy(bool viewFinishing = true)
     {
-        _unit = unit;
-        UpdateCourses();
+        _modalNavigationService.CurrentViewModelChanged -= ModalNavigationService_CurrentViewModelChanged;
+
+        base.ViewDestroy(viewFinishing);
     }
 
-    public event PropertyChangedEventHandler PropertyChanged;
-    public void OnPropertyChanged(string propertyName)
+    private void ModalNavigationService_CurrentViewModelChanged()
     {
-        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
-    }
-
-    public void UpdateCourses()
-    {
-        Courses.Clear();
-
-        var coursesToAdd = _unit.CourseRepository.Get();
-
-        foreach (var course in coursesToAdd)
-        {
-            var courseToadd = _unit.CourseRepository.GetById(course.Id);
-            Courses.Add(courseToadd);
-        }
+        RaisePropertyChanged(() => CurrentModalViewModel);
+        RaisePropertyChanged(() => IsModalOpen);
     }
 }

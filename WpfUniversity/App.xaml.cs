@@ -4,6 +4,11 @@ using System.Windows;
 using UniversityDataLayer.Extensions;
 using WpfUniversity.ViewModels.Courses;
 using MvvmCross.Platforms.Wpf.Views;
+using WpfUniversity.Services;
+using WpfUniversity.Services.Courses;
+using WpfUniversity.ViewModels;
+using System;
+using UniversityDataLayer.UnitOfWorks;
 
 namespace WpfUniversity
 {
@@ -17,9 +22,20 @@ namespace WpfUniversity
                 .ConfigureServices((hostContext, services) =>
                 {
                     var configuration = hostContext.Configuration;
-                    services.AddSingleton<MainWindow>();
                     services.AddDataLayerDependencies(configuration);
-                    services.AddTransient<CourseViewModel>();
+
+                    services.AddSingleton<ModalNavigationService>();
+                    services.AddSingleton<CourseService>();
+                    services.AddSingleton<SelectedCourseService>();
+
+                    services.AddTransient<CourseViewModel>(CreateCourseViewModel);
+                    services.AddSingleton<MainWindowViewModel>();
+
+
+                    services.AddSingleton<MainWindow>((services) => new MainWindow()
+                    {
+                        DataContext = services.GetRequiredService<MainWindowViewModel>()
+                    });
 
                 })
                 .Build();
@@ -40,6 +56,15 @@ namespace WpfUniversity
             await AppHost!.StopAsync();
 
             base.OnExit(e);
+        }
+
+        private CourseViewModel CreateCourseViewModel(IServiceProvider services)
+        {
+            return CourseViewModel.LoadViewModel(
+                services.GetRequiredService<IUnitOfWork>(),
+                services.GetRequiredService<CourseService>(),
+                services.GetRequiredService<SelectedCourseService>(),
+                services.GetRequiredService<ModalNavigationService>());
         }
     }
 }
