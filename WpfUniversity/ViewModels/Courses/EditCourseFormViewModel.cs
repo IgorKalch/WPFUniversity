@@ -7,7 +7,7 @@ using System.Windows.Input;
 
 namespace WpfUniversity.ViewModels.Courses
 {
-    public class AddCourseFormViewModel : ViewModelBase
+    public class EditCourseFormViewModel : ViewModelBase
     {
 
         private string _name;
@@ -22,9 +22,10 @@ namespace WpfUniversity.ViewModels.Courses
             {
                 _name = value;
                 OnPropertyChanged(nameof(Name));
-                OnPropertyChanged(nameof(CanAddCourse));
+                OnPropertyChanged(nameof(CanEditCourse));
             }
         }
+
         public string Description
         {
             get { return _description; }
@@ -57,12 +58,12 @@ namespace WpfUniversity.ViewModels.Courses
 
         public bool HasErrorMessage => !string.IsNullOrEmpty(ErrorMessage);
 
-        public bool CanAddCourse => Name?.Length > 3;
+        public bool CanEditCourse => Name?.Length > 3;
 
         public ICommand SubmitCommand { get; set; }
         public ICommand CancelCommand { get; set; }
 
-        public AddCourseFormViewModel(ICommand submitCommand, ICommand cancelCommand)
+        public EditCourseFormViewModel(ICommand submitCommand, ICommand cancelCommand)
         {
             SubmitCommand = submitCommand;
             CancelCommand = cancelCommand;

@@ -7,8 +7,6 @@ namespace WpfUniversity.ViewModels.Courses;
 
 public  class CourseViewModel : ViewModelBase
 {  
-    private readonly CourseService _courseService;
-    private readonly ModalNavigationService _modalNavigationService;
     private bool _isLoading;
     private string? _errorMessage;
     private bool _hasErrorMessage;
@@ -17,6 +15,8 @@ public  class CourseViewModel : ViewModelBase
     public CourseTreeViewModel CourseTreeViewModel { get;  }
 
     public ICommand AddCourseCommand { get; }
+    public ICommand EditCourseCommand { get; }
+    public ICommand DeleteCourseCommand { get; }
     public ICommand LoadCourseCommand { get; }
     
     public string? ErrorMessage
@@ -25,33 +25,28 @@ public  class CourseViewModel : ViewModelBase
         set
         {
             _errorMessage = value;
+            OnPropertyChanged(nameof(ErrorMessage));
             OnPropertyChanged(nameof(HasErrorMessage));
         }
     }
+    public bool HasErrorMessage => !string.IsNullOrEmpty(ErrorMessage);
 
-    public bool HasErrorMessage
-    {
-        get { return _hasErrorMessage; }
-        set { _hasErrorMessage = value; }
-    }
     public bool IsLoading
     {
         get { return _isLoading; }
         set { _isLoading = value; }
-    }
-
+    }    
 
     public CourseViewModel(CourseService courseService, SelectedCourseService selectedCourseService, ModalNavigationService modalNavigationService)
     {
-        _courseService = courseService;
-        _modalNavigationService = modalNavigationService;
-
         CourseTreeViewModel = new CourseTreeViewModel(courseService, selectedCourseService, modalNavigationService);
         CourseDetailsViewModel = new CourseDetailsViewModel(selectedCourseService);
 
         
         LoadCourseCommand = new LoadCourseCommand(this, courseService);
         AddCourseCommand = new OpenAddCourseCommand(courseService, modalNavigationService);
+        EditCourseCommand = new OpenEditCourseCommand(CourseTreeViewModel, courseService, modalNavigationService);
+        DeleteCourseCommand = new DeleteCourseCommand(this, courseService, modalNavigationService);
     }
 
     public static CourseViewModel LoadViewModel(CourseService courseService, SelectedCourseService selectedCourseService, ModalNavigationService modalNavigationService)

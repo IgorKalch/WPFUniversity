@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using UniversityDataLayer.Entities;
 using UniversityDataLayer.Migrations;
 using UniversityDataLayer.UnitOfWorks;
+using WpfUniversity.ViewModels.Courses;
 
 namespace WpfUniversity.Services.Courses
 {
@@ -48,10 +49,22 @@ namespace WpfUniversity.Services.Courses
 
         public async Task Update(Course course)
         {
-            _unitOfWork.CourseRepository.Update(course);
-            _unitOfWork.Commit();
+            var courseToUpdate = _unitOfWork.CourseRepository.GetById(course.Id);
 
-            CourseAdded?.Invoke(course);
+            if (courseToUpdate != null)
+            {
+                courseToUpdate.Name = course.Name;
+                courseToUpdate.Description = course.Description;
+
+                _unitOfWork.CourseRepository.Update(courseToUpdate);
+                _unitOfWork.Commit();
+
+                CourseUpdated?.Invoke(courseToUpdate);
+            }
+            else
+            {
+                throw new Exception("Course not found.");
+            }
         }
 
         public async Task Delete(Course course)

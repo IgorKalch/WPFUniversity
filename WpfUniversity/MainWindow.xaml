@@ -6,7 +6,9 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
     xmlns:courseview="clr-namespace:WpfUniversity.Views.Courses" 
-    xmlns:vms="clr-namespace:WpfUniversity.ViewModels.Courses"    
+    xmlns:dialogview="clr-namespace:WpfUniversity.Views.Dialogs" 
+    xmlns:vmc="clr-namespace:WpfUniversity.ViewModels.Courses"    
+    xmlns:vmd="clr-namespace:WpfUniversity.ViewModels.Dialogs"    
     xmlns:custom="clr-namespace:ModalControl;assembly=ModalControl" 
     xmlns:viewmodels="clr-namespace:WpfUniversity.ViewModels" d:DataContext="{d:DesignInstance Type=viewmodels:MainWindowViewModel}"
     mc:Ignorable="d"
@@ -15,8 +17,14 @@
     Height="600" 
     Width="1000">
     <Window.Resources>
-        <DataTemplate DataType="{x:Type vms:AddCourseViewModel}">
+        <DataTemplate DataType="{x:Type vmc:AddCourseViewModel}">
             <courseview:AddCourseView />
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type vmc:EditCourseViewModel}">
+            <courseview:EditCourseView />
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type vmd:YesNoDialogViewModel}">
+            <dialogview:YesNoView />
         </DataTemplate>
     </Window.Resources>
     <Grid>

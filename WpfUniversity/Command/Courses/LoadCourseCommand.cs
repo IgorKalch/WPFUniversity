@@ -27,13 +27,18 @@ namespace WpfUniversity.Command.Courses
 
             try
             {
-                await _courseService.Load();
+                await _courseService.Load(); 
+
             }
-            catch (Exception)
+            catch (Exception e)
             {
-                _courseViewModel.ErrorMessage = "Failed to load Course. Please restart the application.";
+                _courseViewModel.ErrorMessage = e.Message;
             }
-            
+            finally
+            {
+                _courseViewModel.IsLoading = false;
+            }
+
         }
     }
 }

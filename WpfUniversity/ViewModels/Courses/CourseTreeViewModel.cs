@@ -56,15 +56,21 @@ namespace WpfUniversity.ViewModels.Courses
 
         public Course SelectedCourse
         {
-            get { return _courses.Where(y => y.Id == _selectedCourseService?.SelectedCourse.Id).FirstOrDefault(); }
+            get { return _courses.FirstOrDefault(y => y.Id == _selectedCourseService?.SelectedCourse?.Id); }
             set {
                 if (_selectedCourseService != null)
                 {
                     _selectedCourseService.SelectedCourse = value;
                     OnPropertyChanged(nameof(SelectedCourse));
+                    OnPropertyChanged(nameof(CanDeleteCourse));
+                    OnPropertyChanged(nameof(CanEditCourse));
                 }
             }
         }
+
+        public bool CanDeleteCourse => SelectedCourse != null && (SelectedCourse.Groups?.Count ?? 0) == 0;
+
+        public bool CanEditCourse => SelectedCourse != null;
 
         private void SelectedCourseService_SelectedCourseChanged()
         {
@@ -88,12 +94,13 @@ namespace WpfUniversity.ViewModels.Courses
 
         private void CourseService_Updated(Course course)
         {
-           var newSelectedCourse = Courses.FirstOrDefault(y => y.Id == course.Id);
+           var newSelectedCourse = _courseService.Courses.FirstOrDefault(y => y.Id == course.Id);
 
-            if (SelectedCourse != newSelectedCourse)
+            if (newSelectedCourse != null)
             {
-                SelectedCourse = newSelectedCourse;
+                _selectedCourseService.SelectedCourse = course;
             }
+            CourseService_CourseLoaded();
         }
 
         private void CourseService_CourseDeleted(Course course)
