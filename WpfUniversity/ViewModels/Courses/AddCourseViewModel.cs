@@ -1,9 +1,4 @@
-﻿using MvvmCross.Commands;
-using System;
-using System.Threading.Tasks;
-using System.Windows.Input;
-using System.Windows.Navigation;
-using UniversityDataLayer.Entities;
+﻿using System.Windows.Input;
 using WpfUniversity.Command;
 using WpfUniversity.Command.Courses;
 using WpfUniversity.Services;

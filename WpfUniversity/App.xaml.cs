@@ -9,6 +9,8 @@ using WpfUniversity.Services.Courses;
 using WpfUniversity.ViewModels;
 using System;
 using UniversityDataLayer.UnitOfWorks;
+using Microsoft.Extensions.Configuration;
+using UniversityDataLayer;
 
 namespace WpfUniversity
 {
@@ -19,8 +21,9 @@ namespace WpfUniversity
         public App()
         {
             AppHost = Host.CreateDefaultBuilder()
+                
                 .ConfigureServices((hostContext, services) =>
-                {
+                 {
                     var configuration = hostContext.Configuration;
                     services.AddDataLayerDependencies(configuration);
 
@@ -28,7 +31,7 @@ namespace WpfUniversity
                     services.AddSingleton<CourseService>();
                     services.AddSingleton<SelectedCourseService>();
 
-                    services.AddTransient<CourseViewModel>(CreateCourseViewModel);
+                    services.AddSingleton<CourseViewModel>(CreateCourseViewModel);
                     services.AddSingleton<MainWindowViewModel>();
 
 
@@ -37,6 +40,12 @@ namespace WpfUniversity
                         DataContext = services.GetRequiredService<MainWindowViewModel>()
                     });
 
+                }).ConfigureAppConfiguration((hostingContext, config) =>
+                {
+                    config.SetBasePath(hostingContext.HostingEnvironment.ContentRootPath)
+                         .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
+                         .AddJsonFile($"appsettings.{hostingContext.HostingEnvironment.EnvironmentName}.json", optional: true)
+                         .AddEnvironmentVariables();
                 })
                 .Build();
         }
@@ -46,7 +55,7 @@ namespace WpfUniversity
             await AppHost!.StartAsync();
 
             var starupForm = AppHost!.Services.GetRequiredService<MainWindow>();
-            starupForm.Show();
+            starupForm.Show();           
 
             base.OnStartup(e);
         }

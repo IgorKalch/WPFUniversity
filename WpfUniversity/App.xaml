@@ -15,6 +15,7 @@
 
             <Style x:Key="ErrorMessage" TargetType="TextBlock">
                 <Setter Property="Foreground" Value="Red" />
+                <Setter Property="TextWrapping" Value="Wrap" />
             </Style>
 
             <Style TargetType="Button">

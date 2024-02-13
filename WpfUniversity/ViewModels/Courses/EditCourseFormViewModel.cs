@@ -1,72 +1,66 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Input;
+﻿using System.Windows.Input;
 
-namespace WpfUniversity.ViewModels.Courses
+namespace WpfUniversity.ViewModels.Courses;
+
+public class EditCourseFormViewModel : ViewModelBase
 {
-    public class EditCourseFormViewModel : ViewModelBase
+
+    private string _name;
+    private string _description;
+    private string? _errorMessage;
+    private bool _isSubmitting;
+
+    public string Name
     {
-
-        private string _name;
-        private string _description;
-        private string? _errorMessage;
-        private bool _isSubmitting;
-
-        public string Name
+        get { return _name; }
+        set
         {
-            get { return _name; }
-            set
-            {
-                _name = value;
-                OnPropertyChanged(nameof(Name));
-                OnPropertyChanged(nameof(CanEditCourse));
-            }
+            _name = value;
+            OnPropertyChanged(nameof(Name));
+            OnPropertyChanged(nameof(CanEditCourse));
         }
+    }
 
-        public string Description
+    public string Description
+    {
+        get { return _description; }
+        set { _description = value; }
+    }
+
+    public string? ErrorMessage
+    {
+        get { return _errorMessage; }
+        set
         {
-            get { return _description; }
-            set { _description = value; }
+            _errorMessage = value;
+            OnPropertyChanged(nameof(ErrorMessage));
+            OnPropertyChanged(nameof(HasErrorMessage));
         }
+    }
 
-        public string? ErrorMessage
+    public bool IsSubmitting
+    {
+        get
         {
-            get { return _errorMessage; }
-            set
-            {
-                _errorMessage = value;
-                OnPropertyChanged(nameof(ErrorMessage));
-                OnPropertyChanged(nameof(HasErrorMessage));
-            }
+            return _isSubmitting;
         }
-
-        public bool IsSubmitting
+        set
         {
-            get
-            {
-                return _isSubmitting;
-            }
-            set
-            {
-                _isSubmitting = value;
-                OnPropertyChanged(nameof(IsSubmitting));
-            }
+            _isSubmitting = value;
+            OnPropertyChanged(nameof(IsSubmitting));
         }
+    }
 
-        public bool HasErrorMessage => !string.IsNullOrEmpty(ErrorMessage);
+    public bool HasErrorMessage => !string.IsNullOrEmpty(ErrorMessage);
 
-        public bool CanEditCourse => Name?.Length > 3;
+    public bool CanEditCourse => Name?.Length > 3;
 
-        public ICommand SubmitCommand { get; set; }
-        public ICommand CancelCommand { get; set; }
+    public ICommand SubmitCommand { get; set; }
+    public ICommand CancelCommand { get; set; }
 
-        public EditCourseFormViewModel(ICommand submitCommand, ICommand cancelCommand)
-        {
-            SubmitCommand = submitCommand;
-            CancelCommand = cancelCommand;
-        }
+    public EditCourseFormViewModel(ICommand submitCommand, ICommand cancelCommand)
+    {
+        SubmitCommand = submitCommand;
+        CancelCommand = cancelCommand;
     }
 }

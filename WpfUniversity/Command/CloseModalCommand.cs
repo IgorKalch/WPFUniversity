@@ -1,24 +1,18 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using WpfUniversity.Services;
+﻿using WpfUniversity.Services;
 
-namespace WpfUniversity.Command
+namespace WpfUniversity.Command;
+
+public class CloseModalCommand : CommandBase
 {
-    public class CloseModalCommand : CommandBase
+    private readonly ModalNavigationService _modalNavigationService;
+
+    public CloseModalCommand(ModalNavigationService modalNavigationService)
     {
-        private readonly ModalNavigationService _modalNavigationService;
+        _modalNavigationService = modalNavigationService;
+    }
 
-        public CloseModalCommand(ModalNavigationService modalNavigationService)
-        {
-            _modalNavigationService = modalNavigationService;
-        }
-
-        public override void Execute(object parameter)
-        {
-            _modalNavigationService.Close();
-        }
+    public override void Execute(object parameter)
+    {
+        _modalNavigationService.Close();
     }
 }

@@ -1,45 +1,43 @@
-﻿using MvvmCross.Commands;
-using UniversityDataLayer.Entities;
+﻿using UniversityDataLayer.Entities;
 using WpfUniversity.Services.Courses;
 
-namespace WpfUniversity.ViewModels.Courses
+namespace WpfUniversity.ViewModels.Courses;
+
+public class CourseDetailsViewModel : ViewModelBase
 {
-    public class CourseDetailsViewModel : ViewModelBase
+    private SelectedCourseService _selectedCourse;
+    private string? _errorMessage;
+    private bool _hasErrorMessage;
+
+    public Course SelectedCourse => _selectedCourse.SelectedCourse;
+
+    public string? ErrorMessage
     {
-        private SelectedCourseService _selectedCourse;
-        private string? _errorMessage;
-        private bool _hasErrorMessage;
-
-        public Course SelectedCourse => _selectedCourse.SelectedCourse;
-
-        public string? ErrorMessage
+        get { return _errorMessage; }
+        set
         {
-            get { return _errorMessage; }
-            set
-            {
-                _errorMessage = value;
-                OnPropertyChanged(nameof(ErrorMessage));
-                OnPropertyChanged(nameof(HasErrorMessage));
-            }
+            _errorMessage = value;
+            OnPropertyChanged(nameof(ErrorMessage));
+            OnPropertyChanged(nameof(HasErrorMessage));
         }
-        public bool HasErrorMessage => !string.IsNullOrEmpty(ErrorMessage);
+    }
+    public bool HasErrorMessage => !string.IsNullOrEmpty(ErrorMessage);
 
-        public CourseDetailsViewModel(SelectedCourseService selectedCourse)
-        {
-            _selectedCourse = selectedCourse;
-            _selectedCourse.SelectedCourseChanged += SelectedCourseService_SelectedCourseChanged;
-        }
+    public CourseDetailsViewModel(SelectedCourseService selectedCourse)
+    {
+        _selectedCourse = selectedCourse;
+        _selectedCourse.SelectedCourseChanged += SelectedCourseService_SelectedCourseChanged;
+    }
 
-        protected override void Dispose()
-        {
-            _selectedCourse.SelectedCourseChanged -= SelectedCourseService_SelectedCourseChanged;
+    protected override void Dispose()
+    {
+        _selectedCourse.SelectedCourseChanged -= SelectedCourseService_SelectedCourseChanged;
 
-            base.Dispose();
-        }
+        base.Dispose();
+    }
 
-        private void SelectedCourseService_SelectedCourseChanged()
-        {
-            OnPropertyChanged(nameof(SelectedCourse));
-        }
+    private void SelectedCourseService_SelectedCourseChanged()
+    {
+        OnPropertyChanged(nameof(SelectedCourse));
     }
 }

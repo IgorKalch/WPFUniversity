@@ -1,26 +1,21 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Input;
 
-namespace WpfUniversity.Command
+namespace WpfUniversity.Command;
+
+public abstract class CommandBase : ICommand
 {
-    public abstract class CommandBase : ICommand
+    public event EventHandler CanExecuteChanged;
+
+    public virtual bool CanExecute(object parameter)
     {
-        public event EventHandler CanExecuteChanged;
+        return true;
+    }
 
-        public virtual bool CanExecute(object parameter)
-        {
-            return true;
-        }
+    public abstract void Execute(object parameter);
 
-        public abstract void Execute(object parameter);
-
-        protected virtual void OnCanExecutedChanged()
-        {
-            CanExecuteChanged?.Invoke(this, new EventArgs());
-        }
+    protected virtual void OnCanExecutedChanged()
+    {
+        CanExecuteChanged?.Invoke(this, new EventArgs());
     }
 }

@@ -7,182 +7,181 @@ using UniversityDataLayer;
 
 #nullable disable
 
-namespace UniversityDataLayer.Migrations
+namespace UniversityDataLayer.Migrations;
+
+[DbContext(typeof(UniversityContext))]
+partial class UniversityContextModelSnapshot : ModelSnapshot
 {
-    [DbContext(typeof(UniversityContext))]
-    partial class UniversityContextModelSnapshot : ModelSnapshot
+    protected override void BuildModel(ModelBuilder modelBuilder)
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
-        {
 #pragma warning disable 612, 618
-            modelBuilder
-                .HasAnnotation("ProductVersion", "7.0.12")
-                .HasAnnotation("Relational:MaxIdentifierLength", 128);
+        modelBuilder
+            .HasAnnotation("ProductVersion", "7.0.12")
+            .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
-            SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
+        SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
-            modelBuilder.Entity("UniversityDataLayer.Entities.Course", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+        modelBuilder.Entity("UniversityDataLayer.Entities.Course", b =>
+            {
+                b.Property<int>("Id")
+                    .ValueGeneratedOnAdd()
+                    .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<string>("Description")
-                        .HasColumnType("nvarchar(max)");
+                b.Property<string>("Description")
+                    .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(450)");
+                b.Property<string>("Name")
+                    .IsRequired()
+                    .HasColumnType("nvarchar(450)");
 
-                    b.HasKey("Id");
+                b.HasKey("Id");
 
-                    b.HasIndex("Name")
-                        .IsUnique();
+                b.HasIndex("Name")
+                    .IsUnique();
 
-                    b.ToTable("Courses", (string)null);
-                });
+                b.ToTable("Courses", (string)null);
+            });
 
-            modelBuilder.Entity("UniversityDataLayer.Entities.Group", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+        modelBuilder.Entity("UniversityDataLayer.Entities.Group", b =>
+            {
+                b.Property<int>("Id")
+                    .ValueGeneratedOnAdd()
+                    .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<int>("CourseId")
-                        .HasColumnType("int");
+                b.Property<int>("CourseId")
+                    .HasColumnType("int");
 
-                    b.Property<string>("Name")
-                        .HasColumnType("nvarchar(450)");
+                b.Property<string>("Name")
+                    .HasColumnType("nvarchar(450)");
 
-                    b.Property<int>("TeacherId")
-                        .HasColumnType("int");
+                b.Property<int>("TeacherId")
+                    .HasColumnType("int");
 
-                    b.HasKey("Id");
+                b.HasKey("Id");
 
-                    b.HasIndex("CourseId");
+                b.HasIndex("CourseId");
 
-                    b.HasIndex("Name")
-                        .IsUnique()
-                        .HasFilter("[Name] IS NOT NULL");
+                b.HasIndex("Name")
+                    .IsUnique()
+                    .HasFilter("[Name] IS NOT NULL");
 
-                    b.HasIndex("TeacherId");
+                b.HasIndex("TeacherId");
 
-                    b.ToTable("Groups", (string)null);
-                });
+                b.ToTable("Groups", (string)null);
+            });
 
-            modelBuilder.Entity("UniversityDataLayer.Entities.Student", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+        modelBuilder.Entity("UniversityDataLayer.Entities.Student", b =>
+            {
+                b.Property<int>("Id")
+                    .ValueGeneratedOnAdd()
+                    .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<string>("FirstName")
-                        .HasColumnType("nvarchar(max)");
+                b.Property<string>("FirstName")
+                    .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("GroupId")
-                        .HasColumnType("int");
+                b.Property<int>("GroupId")
+                    .HasColumnType("int");
 
-                    b.Property<string>("LastName")
-                        .HasColumnType("nvarchar(max)");
+                b.Property<string>("LastName")
+                    .HasColumnType("nvarchar(max)");
 
-                    b.HasKey("Id");
+                b.HasKey("Id");
 
-                    b.HasIndex("GroupId");
+                b.HasIndex("GroupId");
 
-                    b.ToTable("Students", (string)null);
-                });
+                b.ToTable("Students", (string)null);
+            });
 
-            modelBuilder.Entity("UniversityDataLayer.Entities.Teacher", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+        modelBuilder.Entity("UniversityDataLayer.Entities.Teacher", b =>
+            {
+                b.Property<int>("Id")
+                    .ValueGeneratedOnAdd()
+                    .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<int>("CourseId")
-                        .HasColumnType("int");
+                b.Property<int>("CourseId")
+                    .HasColumnType("int");
 
-                    b.Property<string>("FirstName")
-                        .HasColumnType("nvarchar(max)");
+                b.Property<string>("FirstName")
+                    .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("LastName")
-                        .HasColumnType("nvarchar(max)");
+                b.Property<string>("LastName")
+                    .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("Subject")
-                        .HasColumnType("nvarchar(max)");
+                b.Property<string>("Subject")
+                    .HasColumnType("nvarchar(max)");
 
-                    b.HasKey("Id");
+                b.HasKey("Id");
 
-                    b.HasIndex("CourseId");
+                b.HasIndex("CourseId");
 
-                    b.ToTable("Teachers", (string)null);
-                });
+                b.ToTable("Teachers", (string)null);
+            });
 
-            modelBuilder.Entity("UniversityDataLayer.Entities.Group", b =>
-                {
-                    b.HasOne("UniversityDataLayer.Entities.Course", "Course")
-                        .WithMany("Groups")
-                        .HasForeignKey("CourseId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+        modelBuilder.Entity("UniversityDataLayer.Entities.Group", b =>
+            {
+                b.HasOne("UniversityDataLayer.Entities.Course", "Course")
+                    .WithMany("Groups")
+                    .HasForeignKey("CourseId")
+                    .OnDelete(DeleteBehavior.Cascade)
+                    .IsRequired();
 
-                    b.HasOne("UniversityDataLayer.Entities.Teacher", "Techer")
-                        .WithMany("Groups")
-                        .HasForeignKey("TeacherId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                b.HasOne("UniversityDataLayer.Entities.Teacher", "Techer")
+                    .WithMany("Groups")
+                    .HasForeignKey("TeacherId")
+                    .OnDelete(DeleteBehavior.Cascade)
+                    .IsRequired();
 
-                    b.Navigation("Course");
+                b.Navigation("Course");
 
-                    b.Navigation("Techer");
-                });
+                b.Navigation("Techer");
+            });
 
-            modelBuilder.Entity("UniversityDataLayer.Entities.Student", b =>
-                {
-                    b.HasOne("UniversityDataLayer.Entities.Group", "Group")
-                        .WithMany("Students")
-                        .HasForeignKey("GroupId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+        modelBuilder.Entity("UniversityDataLayer.Entities.Student", b =>
+            {
+                b.HasOne("UniversityDataLayer.Entities.Group", "Group")
+                    .WithMany("Students")
+                    .HasForeignKey("GroupId")
+                    .OnDelete(DeleteBehavior.Cascade)
+                    .IsRequired();
 
-                    b.Navigation("Group");
-                });
+                b.Navigation("Group");
+            });
 
-            modelBuilder.Entity("UniversityDataLayer.Entities.Teacher", b =>
-                {
-                    b.HasOne("UniversityDataLayer.Entities.Course", "Course")
-                        .WithMany("Teachers")
-                        .HasForeignKey("CourseId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+        modelBuilder.Entity("UniversityDataLayer.Entities.Teacher", b =>
+            {
+                b.HasOne("UniversityDataLayer.Entities.Course", "Course")
+                    .WithMany("Teachers")
+                    .HasForeignKey("CourseId")
+                    .OnDelete(DeleteBehavior.Cascade)
+                    .IsRequired();
 
-                    b.Navigation("Course");
-                });
+                b.Navigation("Course");
+            });
 
-            modelBuilder.Entity("UniversityDataLayer.Entities.Course", b =>
-                {
-                    b.Navigation("Groups");
+        modelBuilder.Entity("UniversityDataLayer.Entities.Course", b =>
+            {
+                b.Navigation("Groups");
 
-                    b.Navigation("Teachers");
-                });
+                b.Navigation("Teachers");
+            });
 
-            modelBuilder.Entity("UniversityDataLayer.Entities.Group", b =>
-                {
-                    b.Navigation("Students");
-                });
+        modelBuilder.Entity("UniversityDataLayer.Entities.Group", b =>
+            {
+                b.Navigation("Students");
+            });
 
-            modelBuilder.Entity("UniversityDataLayer.Entities.Teacher", b =>
-                {
-                    b.Navigation("Groups");
-                });
+        modelBuilder.Entity("UniversityDataLayer.Entities.Teacher", b =>
+            {
+                b.Navigation("Groups");
+            });
 #pragma warning restore 612, 618
-        }
     }
 }

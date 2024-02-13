@@ -2,77 +2,74 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using UniversityDataLayer.Entities;
-using UniversityDataLayer.Migrations;
 using UniversityDataLayer.UnitOfWorks;
-using WpfUniversity.ViewModels.Courses;
 
-namespace WpfUniversity.Services.Courses
+namespace WpfUniversity.Services.Courses;
+
+public class CourseService
 {
-    public class CourseService
+    private readonly IUnitOfWork _unitOfWork;
+    private readonly List<Course> _courses = new();
+    public List<Course> Courses => _courses;
+
+    public event Action CourseLoaded;
+    public event Action<Course> CourseAdded;
+    public event Action<Course> CourseUpdated;
+    public event Action<Course> CourseDeleted;
+
+    public CourseService(IUnitOfWork unitOfWork)
     {
-        private readonly IUnitOfWork _unitOfWork;
-        private readonly List<Course> _courses = new();
-        public List<Course> Courses => _courses;
+        _unitOfWork = unitOfWork;
+    }
 
-        public event Action CourseLoaded;
-        public event Action<Course> CourseAdded;
-        public event Action<Course> CourseUpdated;
-        public event Action<Course> CourseDeleted;
+    public async Task Load()
+    {            
+        Courses.Clear();
 
-        public CourseService(IUnitOfWork unitOfWork)
+        var coursesToAdd = _unitOfWork.CourseRepository.Get();
+
+        foreach (var course in coursesToAdd)
         {
-            _unitOfWork = unitOfWork;
+            var courseToadd = _unitOfWork.CourseRepository.GetById(course.Id);
+            Courses.Add(courseToadd);
         }
 
-        public async Task Load()
-        {            
-            Courses.Clear();
+        CourseLoaded?.Invoke();
+    }
 
-            var coursesToAdd = _unitOfWork.CourseRepository.Get();
+    public async Task Add(Course course)
+    {
+        _unitOfWork.CourseRepository.Add(course);
+        _unitOfWork.Commit();
 
-            foreach (var course in coursesToAdd)
-            {
-                var courseToadd = _unitOfWork.CourseRepository.GetById(course.Id);
-                Courses.Add(courseToadd);
-            }
+        CourseAdded?.Invoke(course);
+    }
 
-            CourseLoaded?.Invoke();
-        }
+    public async Task Update(Course course)
+    {
+        var courseToUpdate = _unitOfWork.CourseRepository.GetById(course.Id);
 
-        public async Task Add(Course course)
+        if (courseToUpdate != null)
         {
-            _unitOfWork.CourseRepository.Add(course);
+            courseToUpdate.Name = course.Name;
+            courseToUpdate.Description = course.Description;
+
+            _unitOfWork.CourseRepository.Update(courseToUpdate);
             _unitOfWork.Commit();
 
-            CourseAdded?.Invoke(course);
+            CourseUpdated?.Invoke(courseToUpdate);
         }
-
-        public async Task Update(Course course)
+        else
         {
-            var courseToUpdate = _unitOfWork.CourseRepository.GetById(course.Id);
-
-            if (courseToUpdate != null)
-            {
-                courseToUpdate.Name = course.Name;
-                courseToUpdate.Description = course.Description;
-
-                _unitOfWork.CourseRepository.Update(courseToUpdate);
-                _unitOfWork.Commit();
-
-                CourseUpdated?.Invoke(courseToUpdate);
-            }
-            else
-            {
-                throw new Exception("Course not found.");
-            }
+            throw new Exception("Course not found.");
         }
+    }
 
-        public async Task Delete(Course course)
-        {
-            _unitOfWork.CourseRepository.Remove(course);
-            _unitOfWork.Commit();
+    public async Task Delete(Course course)
+    {
+        _unitOfWork.CourseRepository.Remove(course);
+        _unitOfWork.Commit();
 
-            CourseDeleted?.Invoke(course);
-        }
+        CourseDeleted?.Invoke(course);
     }
 }

@@ -1,47 +1,44 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Windows;
 using System.Windows.Input;
 using WpfUniversity.Command;
 using WpfUniversity.Services;
 
-namespace WpfUniversity.ViewModels.Dialogs
+namespace WpfUniversity.ViewModels.Dialogs;
+
+public class YesNoDialogViewModel : ViewModelBase
 {
-    public class YesNoDialogViewModel : ViewModelBase
+    private string _message;
+    private readonly ModalNavigationService _modalNavigationService;
+
+    public string Message
     {
-        private string _message;
-        private readonly ModalNavigationService _modalNavigationService;
+        get { return _message; }
+        set { _message = value; OnPropertyChanged(nameof(Message)); }
+    }
 
-        public string Message
-        {
-            get { return _message; }
-            set { _message = value; }
-        }
+    public ICommand ShowDialogCommand { get; }
 
-        public ICommand YesCommand { get; }
-        public ICommand NoCommand { get; }
+    public bool UserChoice { get; private set; }
 
-        public bool UserChoice { get; private set; }
+    public YesNoDialogViewModel(ModalNavigationService modalNavigationService)
+    {
+        ShowDialogCommand = new RelayCommand(ShowDialog);
+        _modalNavigationService = modalNavigationService;
+    }
 
-        public YesNoDialogViewModel(ModalNavigationService modalNavigationService)
-        {
-            YesCommand = new RelayCommand(Yes);
-            NoCommand = new RelayCommand(No);
-            _modalNavigationService = modalNavigationService;
-        }
+    private void ShowDialog(object parameter)
+    {
+        var result = MessageBox.Show(Message, "Confirmation", MessageBoxButton.YesNo, MessageBoxImage.Question);
 
-        private void Yes(object parameter)
+        if (result == MessageBoxResult.Yes)
         {
             UserChoice = true;
-            _modalNavigationService.Close();
         }
-
-        private void No(object parameter)
+        else
         {
             UserChoice = false;
-            _modalNavigationService.Close();
         }
+
+        _modalNavigationService.Close();
     }
 }

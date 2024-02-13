@@ -1,12 +1,4 @@
-﻿using MvvmCross.ViewModels;
-using System.Collections.ObjectModel;
-using System.ComponentModel;
-using System.Linq;
-using System.Runtime.CompilerServices;
-using System.Windows.Input;
-using UniversityDataLayer.Entities;
-using UniversityDataLayer.UnitOfWorks;
-using WpfUniversity.Services;
+﻿using WpfUniversity.Services;
 using WpfUniversity.ViewModels.Courses;
 
 namespace WpfUniversity.ViewModels;
