@@ -94,9 +94,9 @@ public class CourseTreeViewModel : ViewModelBase
 
     public Group SelectedGroup
     {
-        get {
-            var a = _groups.FirstOrDefault(g => g.Id == _selectedGroupService?.SelectedGroup?.Id);
-            return  a; 
+        get 
+        {
+            return _groups.FirstOrDefault(g => g.Id == _selectedGroupService?.SelectedGroup?.Id);             
         }
         set
         {

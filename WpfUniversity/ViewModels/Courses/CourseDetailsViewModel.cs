@@ -18,8 +18,9 @@ public class CourseDetailsViewModel : ViewModelBase
 
     public Course SelectedCourse => _selectedCourse.SelectedCourse;
     public Group SelectedGroup => _selectedGroup.SelectedGroup;
-
     public bool IsSelectedGroup => SelectedGroup != null;
+    public int TeacherCount => SelectedCourse?.Teachers?.Count ?? 0;
+    public int GroupCount => SelectedCourse?.Groups?.Count ?? 0;
 
     public string? ErrorMessage
     {
@@ -56,6 +57,8 @@ public class CourseDetailsViewModel : ViewModelBase
     private void SelectedCourseService_SelectedCourseChanged()
     {
         OnPropertyChanged(nameof(SelectedCourse));
+        OnPropertyChanged(nameof(TeacherCount));
+        OnPropertyChanged(nameof(GroupCount));
     }
 
     private void SelectedGroupService_SelectedGroupChanged()

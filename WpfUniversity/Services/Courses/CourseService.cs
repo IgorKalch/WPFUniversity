@@ -42,6 +42,8 @@ public class CourseService
         _unitOfWork.CourseRepository.Add(course);
         _unitOfWork.Commit();
 
+        Load();
+
         CourseAdded?.Invoke(course);
     }
 
@@ -57,6 +59,8 @@ public class CourseService
             _unitOfWork.CourseRepository.Update(courseToUpdate);
             _unitOfWork.Commit();
 
+            Load();
+
             CourseUpdated?.Invoke(courseToUpdate);
         }
         else
@@ -69,6 +73,8 @@ public class CourseService
     {
         _unitOfWork.CourseRepository.Remove(course);
         _unitOfWork.Commit();
+
+        Load();
 
         CourseDeleted?.Invoke(course);
     }

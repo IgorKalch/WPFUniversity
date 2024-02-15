@@ -16,6 +16,8 @@
                     <RowDefinition Height="auto"/>
                     <RowDefinition Height="auto"/>
                     <RowDefinition Height="auto"/>
+                    <RowDefinition Height="auto"/>
+                    <RowDefinition Height="auto"/>
                     <RowDefinition Height="*"/>
                 </Grid.RowDefinitions>
 
@@ -47,6 +49,36 @@
                                Margin="10 0 0 0" 
                                TextWrapping="Wrap"
                                Text="{Binding SelectedCourse.Description}" />
+
+                </Grid>
+                
+                <Grid Grid.Row="3" Margin="20 10 0 0" >
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="auto"  SharedSizeGroup="Label"/>
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+
+
+                    <TextBlock Grid.Column="0" Text="Group count: " FontWeight="Bold"/>
+                    <TextBlock Grid.Column="1" 
+                                   Margin="10 0 0 0" 
+                                   TextWrapping="Wrap"
+                                   Text="{Binding GroupCount}" />      
+
+                </Grid>
+
+                <Grid Grid.Row="4" Margin="20 10 0 0" >
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="auto"  SharedSizeGroup="Label"/>
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+
+
+                    <TextBlock Grid.Column="0" Text="Teacher count: " FontWeight="Bold"/>
+                    <TextBlock Grid.Column="1" 
+                   Margin="10 0 0 0" 
+                   TextWrapping="Wrap"
+                   Text="{Binding TeacherCount}" />
 
                 </Grid>
 
