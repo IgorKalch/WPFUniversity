@@ -7,8 +7,10 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
     xmlns:courseview="clr-namespace:WpfUniversity.Views.Courses" 
     xmlns:dialogview="clr-namespace:WpfUniversity.Views.Dialogs" 
+    xmlns:groupgview="clr-namespace:WpfUniversity.Views.Groups" 
     xmlns:vmc="clr-namespace:WpfUniversity.ViewModels.Courses"    
     xmlns:vmd="clr-namespace:WpfUniversity.ViewModels.Dialogs"    
+    xmlns:vmg="clr-namespace:WpfUniversity.ViewModels.Groups"    
     xmlns:custom="clr-namespace:ModalControl;assembly=ModalControl" 
     xmlns:viewmodels="clr-namespace:WpfUniversity.ViewModels" d:DataContext="{d:DesignInstance Type=viewmodels:MainWindowViewModel}"
     mc:Ignorable="d"
@@ -25,6 +27,9 @@
         </DataTemplate>
         <DataTemplate DataType="{x:Type vmd:YesNoDialogViewModel}">
             <dialogview:YesNoView />
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type vmg:GroupViewModel}">
+            <groupgview:GroupView />
         </DataTemplate>
     </Window.Resources>
     <Grid>

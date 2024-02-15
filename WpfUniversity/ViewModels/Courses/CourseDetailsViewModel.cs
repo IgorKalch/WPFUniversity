@@ -1,15 +1,25 @@
-﻿using UniversityDataLayer.Entities;
+﻿using System.Windows.Input;
+using UniversityDataLayer.Entities;
+using WpfUniversity.Command.Groups;
+using WpfUniversity.Services;
 using WpfUniversity.Services.Courses;
+using WpfUniversity.Services.Groups;
+using WpfUniversity.StartUpHelpers;
+using WpfUniversity.ViewModels.Groups;
 
 namespace WpfUniversity.ViewModels.Courses;
 
 public class CourseDetailsViewModel : ViewModelBase
 {
     private SelectedCourseService _selectedCourse;
+    private SelectedGroupService _selectedGroup;
     private string? _errorMessage;
     private bool _hasErrorMessage;
 
     public Course SelectedCourse => _selectedCourse.SelectedCourse;
+    public Group SelectedGroup => _selectedGroup.SelectedGroup;
+
+    public bool IsSelectedGroup => SelectedGroup != null;
 
     public string? ErrorMessage
     {
@@ -23,15 +33,22 @@ public class CourseDetailsViewModel : ViewModelBase
     }
     public bool HasErrorMessage => !string.IsNullOrEmpty(ErrorMessage);
 
-    public CourseDetailsViewModel(SelectedCourseService selectedCourse)
+    public ICommand OpenGroupCommand { get; set; }
+
+    public CourseDetailsViewModel(SelectedCourseService selectedCourse, SelectedGroupService selectedGroup, ModalNavigationService modalNavigationService)
     {
         _selectedCourse = selectedCourse;
         _selectedCourse.SelectedCourseChanged += SelectedCourseService_SelectedCourseChanged;
+        _selectedGroup = selectedGroup;
+        _selectedGroup.SelectedGroupChanged += SelectedGroupService_SelectedGroupChanged;
+
+        OpenGroupCommand = new OpenGroupCommand(selectedGroup.SelectedGroup, modalNavigationService);
     }
 
     protected override void Dispose()
     {
         _selectedCourse.SelectedCourseChanged -= SelectedCourseService_SelectedCourseChanged;
+        _selectedGroup.SelectedGroupChanged -= SelectedGroupService_SelectedGroupChanged;
 
         base.Dispose();
     }
@@ -39,5 +56,11 @@ public class CourseDetailsViewModel : ViewModelBase
     private void SelectedCourseService_SelectedCourseChanged()
     {
         OnPropertyChanged(nameof(SelectedCourse));
+    }
+
+    private void SelectedGroupService_SelectedGroupChanged()
+    {
+        OnPropertyChanged(nameof(SelectedGroup));
+        OnPropertyChanged(nameof(IsSelectedGroup));
     }
 }

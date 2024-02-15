@@ -14,9 +14,12 @@ public partial class CourseTree : UserControl
 
     private void OnSelectedItemChanged(object sender, RoutedPropertyChangedEventArgs<object> e)
     {
-        if (DataContext is CourseTreeViewModel viewModel)
+
+        if (DataContext is CourseTreeViewModel treeModel)
         {
-            viewModel.SelectedCourse = e.NewValue as Course;
+            treeModel.SelectedGroup = e.NewValue as Group;
+            treeModel.SelectedCourse = e.NewValue as Course;
+           
         }
     }
 }

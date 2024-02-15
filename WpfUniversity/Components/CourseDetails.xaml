@@ -50,6 +50,22 @@
 
                 </Grid>
 
+                <Grid Grid.Row="8" 
+                    HorizontalAlignment="Right"
+                    VerticalAlignment="Bottom" Margin="20 10 0 0" >
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="auto"  SharedSizeGroup="Label"/>
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+
+                    <Button 
+                            Margin="3 3 3 3"
+                            AutomationProperties.AutomationId="" 
+                            Content="Group Details" 
+                            Command="{Binding OpenGroupCommand}"
+                            IsEnabled="{Binding IsSelectedGroup}"/>
+                </Grid>
+
                 <TextBlock
                          Grid.Row="3"
                          Margin="0,15,0,0"

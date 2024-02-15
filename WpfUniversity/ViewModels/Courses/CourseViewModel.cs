@@ -2,6 +2,7 @@
 using WpfUniversity.Command.Courses;
 using WpfUniversity.Services;
 using WpfUniversity.Services.Courses;
+using WpfUniversity.Services.Groups;
 
 namespace WpfUniversity.ViewModels.Courses;
 
@@ -37,10 +38,11 @@ public  class CourseViewModel : ViewModelBase
         set { _isLoading = value; }
     }    
 
-    public CourseViewModel(CourseService courseService, SelectedCourseService selectedCourseService, ModalNavigationService modalNavigationService)
+    public CourseViewModel(CourseService courseService, SelectedCourseService selectedCourseService, GroupService groupService, SelectedGroupService selectedGroupService
+        , ModalNavigationService modalNavigationService)
     {
-        CourseTreeViewModel = new CourseTreeViewModel(courseService, selectedCourseService, modalNavigationService);
-        CourseDetailsViewModel = new CourseDetailsViewModel(selectedCourseService);
+        CourseTreeViewModel = new CourseTreeViewModel(courseService, selectedCourseService, groupService, selectedGroupService,  modalNavigationService);
+        CourseDetailsViewModel = new CourseDetailsViewModel(selectedCourseService, selectedGroupService, modalNavigationService);
 
         
         LoadCourseCommand = new LoadCourseCommand(this, courseService);
@@ -49,9 +51,9 @@ public  class CourseViewModel : ViewModelBase
         DeleteCourseCommand = new DeleteCourseCommand(this, courseService, modalNavigationService);
     }
 
-    public static CourseViewModel LoadViewModel(CourseService courseService, SelectedCourseService selectedCourseService, ModalNavigationService modalNavigationService)
+    public static CourseViewModel LoadViewModel(CourseService courseService, SelectedCourseService selectedCourseService, GroupService groupService, SelectedGroupService selectedGroupService, ModalNavigationService modalNavigationService)
     {
-        CourseViewModel viewModel = new CourseViewModel(courseService, selectedCourseService, modalNavigationService);
+        CourseViewModel viewModel = new CourseViewModel(courseService, selectedCourseService, groupService, selectedGroupService, modalNavigationService);
 
         viewModel.LoadCourseCommand.Execute(null);
 

@@ -11,6 +11,11 @@ using System;
 using UniversityDataLayer.UnitOfWorks;
 using Microsoft.Extensions.Configuration;
 using UniversityDataLayer;
+using WpfUniversity.Services.Groups;
+using WpfUniversity.StartUpHelpers;
+using System.Text.RegularExpressions;
+using WpfUniversity.Views.Groups;
+using WpfUniversity.ViewModels.Groups;
 
 namespace WpfUniversity
 {
@@ -30,9 +35,13 @@ namespace WpfUniversity
                     services.AddSingleton<ModalNavigationService>();
                     services.AddSingleton<CourseService>();
                     services.AddSingleton<SelectedCourseService>();
+                     services.AddSingleton<GroupService>();
+                    services.AddSingleton<SelectedGroupService>();
 
                     services.AddSingleton<CourseViewModel>(CreateCourseViewModel);
                     services.AddSingleton<MainWindowViewModel>();
+                     // todo: check how it works
+                    //services.AddFormFactory<GroupView>();
 
 
                     services.AddSingleton<MainWindow>((services) => new MainWindow()
@@ -72,6 +81,8 @@ namespace WpfUniversity
             return CourseViewModel.LoadViewModel(
                 services.GetRequiredService<CourseService>(),
                 services.GetRequiredService<SelectedCourseService>(),
+                services.GetRequiredService<GroupService>(),
+                services.GetRequiredService<SelectedGroupService>(),
                 services.GetRequiredService<ModalNavigationService>());
         }
     }

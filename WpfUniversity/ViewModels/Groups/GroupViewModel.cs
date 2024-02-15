@@ -6,7 +6,7 @@ using UniversityDataLayer.Entities;
 
 namespace WpfUniversity.ViewModels.Groups;
 
-public class GroupViewModel : INotifyPropertyChanged
+public class GroupViewModel : ViewModelBase
 {
     private readonly Group _group;
 
@@ -72,12 +72,5 @@ public class GroupViewModel : INotifyPropertyChanged
             _group.Techer = value;
             OnPropertyChanged(nameof(Teacher));
         }
-    }
-
-    public event PropertyChangedEventHandler? PropertyChanged;
-    public void OnPropertyChanged([CallerMemberName] string prop = "")
-    {
-        if (PropertyChanged != null)
-            PropertyChanged(this, new PropertyChangedEventArgs(prop));
     }
 }
