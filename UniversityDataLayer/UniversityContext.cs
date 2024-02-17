@@ -13,9 +13,13 @@ public class UniversityContext: DbContext
     {
         base.OnModelCreating(modelBuilder);
 
-        ApplyEntityConfigurations(modelBuilder);
+        modelBuilder.ApplyConfiguration(new GroupConfiguration());
+        modelBuilder.ApplyConfiguration(new StudentConfiguration());
+        modelBuilder.ApplyConfiguration(new CourseConfiguration());
+        modelBuilder.ApplyConfiguration(new TeacherConfiguration());
     }
 
+    // todo: does not work after updating all nuget packages and upgrading to .net 8.0  
     private void ApplyEntityConfigurations(ModelBuilder modelBuilder)
     {
         var entityTypeConfigurationType = typeof(IEntityTypeConfiguration<>);
