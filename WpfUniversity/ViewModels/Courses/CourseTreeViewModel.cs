@@ -139,16 +139,19 @@ public class CourseTreeViewModel : ViewModelBase
     private void CourseService_CourseAdded(Course course)
     {
         Courses.Add(course);
+
+        CourseService_CourseLoaded();
     }
 
     private void CourseService_Updated(Course course)
     {
-       var newSelectedCourse = _courseService.Courses.FirstOrDefault(y => y.Id == course.Id);
+       var newSelectedCourse = Courses.FirstOrDefault(y => y.Id == course.Id);
 
         if (newSelectedCourse != null)
         {
-            _selectedCourseService.SelectedCourse = course;
+            _selectedCourseService.SelectedCourse = newSelectedCourse;
         }
+
         CourseService_CourseLoaded();
     }
 
@@ -160,6 +163,8 @@ public class CourseTreeViewModel : ViewModelBase
         {
             Courses.Remove(courseToDelete);
         }
+
+        CourseService_CourseLoaded();
     }
 
     private void Courses_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
