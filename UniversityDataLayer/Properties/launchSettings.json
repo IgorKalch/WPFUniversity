@@ -1,14 +1,12 @@
 {
   "profiles": {
-    "WpfUniversityDev": {
+    "UniversityDataLayer": {
       "commandName": "Project",
       "environmentVariables": {
         "DOTNET_ENVIRONMENT": "Development"
-      },
-      "nativeDebugging": false,
-      "sqlDebugging": true
+      }
     },
-    "WpfUniversityProduction": {
+    "Production": {
       "commandName": "Project",
       "environmentVariables": {
         "DOTNET_ENVIRONMENT": "Production"

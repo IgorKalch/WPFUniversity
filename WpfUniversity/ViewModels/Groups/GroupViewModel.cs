@@ -1,76 +1,91 @@
 ﻿using System.Collections.ObjectModel;
-using System.ComponentModel;
 using System.Linq;
-using System.Runtime.CompilerServices;
+using System.Threading.Tasks;
+using System.Windows.Input;
 using UniversityDataLayer.Entities;
+using WpfUniversity.Commands;
+using WpfUniversity.Services.Interfaces;
 
 namespace WpfUniversity.ViewModels.Groups;
-
-public class GroupViewModel : ViewModelBase
+public class GroupsViewModel : ViewModelBase
 {
-    private readonly Group _group;
+    private readonly IGroupService _groupService;
 
-    public GroupViewModel(Group group)
+    public GroupsViewModel(IGroupService groupService, Course course)
     {
-        _group = group;
+        _groupService = groupService;
+        Course = course;
+
+        Groups = new ObservableCollection<Group>();
+        LoadGroupsCommand = new AsyncRelayCommand(LoadGroups);
+
+        NextPageGroupsCommand = new RelayCommand(NextPageGroups, () => CanGoToNextPageGroups);
+        PreviousPageGroupsCommand = new RelayCommand(PreviousPageGroups, () => CanGoToPreviousPageGroups);
+
+        _ = LoadGroups();
     }
-    public int CourseId
+    public Course Course { get; }
+    public ObservableCollection<Group> Groups { get; set; }
+
+    private int _currentPageGroups = 1;
+    private int _itemsPerPageGroups = 10;
+    private int _totalGroups;
+
+    public int CurrentPageGroups
     {
-        get { return _group.CourseId; }
+        get => _currentPageGroups;
         set
         {
-            _group.CourseId = value;
-            OnPropertyChanged(nameof(CourseId));
+            if (SetProperty(ref _currentPageGroups, value))
+            {
+                UpdateGroupsCollection();
+            }
         }
     }
 
-    public int TeacherId
+    public bool CanGoToNextPageGroups => _currentPageGroups * _itemsPerPageGroups < _totalGroups;
+    public bool CanGoToPreviousPageGroups => _currentPageGroups > 1;
+
+    public ICommand LoadGroupsCommand { get; }
+    public ICommand NextPageGroupsCommand { get; }
+    public ICommand PreviousPageGroupsCommand { get; }
+
+    public async Task LoadGroups()
     {
-        get { return _group.TeacherId; }
-        set
-        {
-            _group.TeacherId = value;
-            OnPropertyChanged(nameof(TeacherId));
-        }
+        await _groupService.LoadGroupsByCourseId(Course.Id);
+
+        _totalGroups = _groupService.Groups.Count;
+        UpdateGroupsCollection();
     }
 
-    public string? Name
+    private void UpdateGroupsCollection()
     {
-        get { return _group.Name; }
-        set
+        var pagedGroups = _groupService.Groups
+            .Skip((_currentPageGroups - 1) * _itemsPerPageGroups)
+            .Take(_itemsPerPageGroups);
+
+        Groups.Clear();
+        foreach (var group in pagedGroups)
         {
-            _group.Name = value;
-            OnPropertyChanged(nameof(Name));
+            Groups.Add(group);
         }
+
+        OnPropertyChanged(nameof(CanGoToNextPageGroups));
+        OnPropertyChanged(nameof(CanGoToPreviousPageGroups));
     }
 
-    public ObservableCollection<Student>? Students
+    private void NextPageGroups()
     {
-        get { return new ObservableCollection<Student>(_group.Students); }
-        set
-        {
-            _group.Students = value.ToList();
-            OnPropertyChanged(nameof(Students));
-        }
+        _currentPageGroups++;
+        UpdateGroupsCollection();
     }
 
-    public Course? Course
+    private void PreviousPageGroups()
     {
-        get { return _group.Course; }
-        set
+        if (_currentPageGroups > 1)
         {
-            _group.Course = value;
-            OnPropertyChanged(nameof(Course));
-        }
-    }
-
-    public Teacher? Teacher
-    {
-        get { return _group.Techer; }
-        set
-        {
-            _group.Techer = value;
-            OnPropertyChanged(nameof(Teacher));
+            _currentPageGroups--;
+            UpdateGroupsCollection();
         }
     }
 }

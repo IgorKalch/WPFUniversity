@@ -3,19 +3,15 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using UniversityDataLayer.Entities;
 using UniversityDataLayer.UnitOfWorks;
+using WpfUniversity.Services.Interfaces;
 
 namespace WpfUniversity.Services.Courses;
 
-public class CourseService
+public class CourseService : ICourseService
 {
     private readonly IUnitOfWork _unitOfWork;
-    private readonly List<Course> _courses = new();
+    private readonly List<Course> _courses = [];
     public List<Course> Courses => _courses;
-
-    public event Action CourseLoaded;
-    public event Action<Course> CourseAdded;
-    public event Action<Course> CourseUpdated;
-    public event Action<Course> CourseDeleted;
 
     public CourseService(IUnitOfWork unitOfWork)
     {
@@ -23,18 +19,12 @@ public class CourseService
     }
 
     public async Task Load()
-    {            
+    {
         Courses.Clear();
 
-        var coursesToAdd = _unitOfWork.CourseRepository.Get();
+        var coursesToAdd = await Task.Run(() => _unitOfWork.CourseRepository.Get());
 
-        foreach (var course in coursesToAdd)
-        {
-            var courseToadd = _unitOfWork.CourseRepository.GetById(course.Id);
-            Courses.Add(courseToadd);
-        }
-
-        CourseLoaded?.Invoke();
+        Courses.AddRange(coursesToAdd);
     }
 
     public async Task Add(Course course)
@@ -42,9 +32,7 @@ public class CourseService
         _unitOfWork.CourseRepository.Add(course);
         _unitOfWork.Commit();
 
-        Load();
-
-        CourseAdded?.Invoke(course);
+        await Load();
     }
 
     public async Task Update(Course course)
@@ -59,9 +47,7 @@ public class CourseService
             _unitOfWork.CourseRepository.Update(courseToUpdate);
             _unitOfWork.Commit();
 
-            Load();
-
-            CourseUpdated?.Invoke(courseToUpdate);
+            await Load();
         }
         else
         {
@@ -74,8 +60,6 @@ public class CourseService
         _unitOfWork.CourseRepository.Remove(course);
         _unitOfWork.Commit();
 
-        Load();
-
-        CourseDeleted?.Invoke(course);
+        await Load();
     }
 }

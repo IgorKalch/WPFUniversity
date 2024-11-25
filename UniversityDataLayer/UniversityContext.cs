@@ -3,7 +3,7 @@ using UniversityDataLayer.Configurations;
 
 namespace UniversityDataLayer;
 
-public class UniversityContext: DbContext
+public class UniversityContext : DbContext
 {
     public UniversityContext(DbContextOptions<UniversityContext> options) : base(options)
     {

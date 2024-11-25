@@ -10,60 +10,97 @@ public partial class InsertData : Migration
     /// <inheritdoc />
     protected override void Up(MigrationBuilder migrationBuilder)
     {
-        migrationBuilder.InsertData(
-            table: "Courses",
-            columns: new[] { "Name", "Description" },
-            values: new object[,]
-            {
-        { "History", "World history and civilizations" },
-        { "Literature", "Classic and modern literature" },
-        { "Mathematics", "Algebra and calculus" },
-            });
+        for (int i = 1; i <= 100; i++)
+        {
+            migrationBuilder.InsertData(
+                table: "Courses",
+                columns: new[] { "Id", "Name", "Description" },
+                values: new object[] { i, $"Course {i}", $"Description for Course {i}" }
+            );
+        }
 
-        migrationBuilder.InsertData(
-            table: "Teachers",
-            columns: new[] { "CourseId", "FirstName", "LastName", "Subject" },
-            values: new object[,]
-            {
-        { 1, "John", "Smith", "History" },
-        { 2, "Emily", "Johnson", "Literature" },
-        { 3, "Michael", "Brown", "Math" },
-            });
+        for (int i = 1; i <= 100; i++)
+        {
+            int courseId = (i % 100) + 1;
 
-        migrationBuilder.InsertData(
-            table: "Groups",
-            columns: new[] { "CourseId", "TeacherId", "Name" },
-            values: new object[,]
-            {
-        { 1, 1, "History Group 1" },
-        { 2, 2, "Literature Group 1" },
-        { 3, 3, "Math Group 1" },
-            });
+            migrationBuilder.InsertData(
+                table: "Teachers",
+                columns: new[] { "Id", "FirstName", "LastName", "Subject", "CourseId" },
+                values: new object[] { i, $"TeacherFirstName{i}", $"TeacherLastName{i}", $"Subject {i}", courseId }
+            );
+        }
 
-        migrationBuilder.InsertData(
-            table: "Students",
-            columns: new[] { "GroupId", "FirstName", "LastName" },
-            values: new object[,]
+        for (int i = 1; i <= 100; i++)
+        {
+            int courseId = (i % 100) + 1;
+            int teacherId = (i % 100) + 1;
+
+            migrationBuilder.InsertData(
+                table: "Groups",
+                columns: new[] { "Id", "Name", "CourseId", "TeacherId" },
+                values: new object[] { i, $"Group {i}", courseId, teacherId }
+            );
+        }
+
+        int studentId = 1;
+        for (int groupId = 1; groupId <= 100; groupId++)
+        {
+            for (int s = 1; s <= 10; s++)
             {
-        { 1, "Michael", "Brown" },
-        { 2, "Olivia", "Taylor" },
-        { 3, "Ethan", "Williams" },
-            });
+                migrationBuilder.InsertData(
+                    table: "Students",
+                    columns: new[] { "Id", "FirstName", "LastName", "GroupId" },
+                    values: new object[] { studentId, $"StudentFirstName{studentId}", $"StudentLastName{studentId}", groupId }
+                );
+                studentId++;
+            }
+        }
     }
 
-    /// <inheritdoc />
     protected override void Down(MigrationBuilder migrationBuilder)
     {
-        migrationBuilder.DropTable(
-             name: "Students");
+        var studentKeyValues = new object[1000, 1];
+        for (int i = 0; i < 1000; i++)
+        {
+            studentKeyValues[i, 0] = i + 1;
+        }
+        migrationBuilder.DeleteData(
+            table: "Students",
+            keyColumns: new[] { "Id" },
+            keyValues: studentKeyValues
+        );
 
-        migrationBuilder.DropTable(
-            name: "Groups");
+        var groupKeyValues = new object[100, 1];
+        for (int i = 0; i < 100; i++)
+        {
+            groupKeyValues[i, 0] = i + 1;
+        }
+        migrationBuilder.DeleteData(
+            table: "Groups",
+            keyColumns: new[] { "Id" },
+            keyValues: groupKeyValues
+        );
 
-        migrationBuilder.DropTable(
-            name: "Teachers");
+        var teacherKeyValues = new object[100, 1];
+        for (int i = 0; i < 100; i++)
+        {
+            teacherKeyValues[i, 0] = i + 1;
+        }
+        migrationBuilder.DeleteData(
+            table: "Teachers",
+            keyColumns: new[] { "Id" },
+            keyValues: teacherKeyValues
+        );
 
-        migrationBuilder.DropTable(
-            name: "Courses");
+        var courseKeyValues = new object[100, 1];
+        for (int i = 0; i < 100; i++)
+        {
+            courseKeyValues[i, 0] = i + 1;
+        }
+        migrationBuilder.DeleteData(
+            table: "Courses",
+            keyColumns: new[] { "Id" },
+            keyValues: courseKeyValues
+        );
     }
 }

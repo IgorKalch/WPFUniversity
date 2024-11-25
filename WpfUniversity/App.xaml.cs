@@ -1,61 +1,68 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using System.Windows;
-using UniversityDataLayer.Extensions;
-using WpfUniversity.ViewModels.Courses;
 using MvvmCross.Platforms.Wpf.Views;
+using System;
+using System.IO;
+using System.Windows;
+using UniversityDataLayer;
+using UniversityDataLayer.UnitOfWorks;
 using WpfUniversity.Services;
 using WpfUniversity.Services.Courses;
+using WpfUniversity.Services.Interfaces;
 using WpfUniversity.ViewModels;
-using System;
-using UniversityDataLayer.UnitOfWorks;
-using Microsoft.Extensions.Configuration;
-using UniversityDataLayer;
-using WpfUniversity.Services.Groups;
-using WpfUniversity.StartUpHelpers;
-using System.Text.RegularExpressions;
-using WpfUniversity.Views.Groups;
 using WpfUniversity.ViewModels.Groups;
+using WpfUniversity.Views.Groups;
+using WpfUniversity.WindowFactories;
+using WpfUniversity.WindowFactories.Interfaces;
 
 namespace WpfUniversity
 {
     public partial class App : MvxApplication
     {
-        public  IHost? AppHost { get; private set; }
+        public IHost? AppHost { get; private set; }
 
         public App()
         {
             AppHost = Host.CreateDefaultBuilder()
-                
-                .ConfigureServices((hostContext, services) =>
-                 {
-                    var configuration = hostContext.Configuration;
-                    services.AddDataLayerDependencies(configuration);
-
-                    services.AddSingleton<ModalNavigationService>();
-                    services.AddSingleton<CourseService>();
-                    services.AddSingleton<SelectedCourseService>();
-                     services.AddSingleton<GroupService>();
-                    services.AddSingleton<SelectedGroupService>();
-
-                    services.AddSingleton<CourseViewModel>(CreateCourseViewModel);
-                    services.AddSingleton<MainWindowViewModel>();
-                     // todo: check how it works
-                    //services.AddFormFactory<GroupView>();
-
-
-                    services.AddSingleton<MainWindow>((services) => new MainWindow()
-                    {
-                        DataContext = services.GetRequiredService<MainWindowViewModel>()
-                    });
-
-                }).ConfigureAppConfiguration((hostingContext, config) =>
+                .ConfigureAppConfiguration((hostingContext, config) =>
                 {
-                    config.SetBasePath(hostingContext.HostingEnvironment.ContentRootPath)
-                         .AddJsonFile($"appsettings.json")
+                    config.SetBasePath(Directory.GetCurrentDirectory())
+                         //.AddJsonFile($"appsettings.json")
                          .AddJsonFile($"appsettings.{hostingContext.HostingEnvironment.EnvironmentName}.json")
                          .AddEnvironmentVariables();
+
                 })
+                .ConfigureServices((hostContext, services) =>
+                 {
+                     var configuration = hostContext.Configuration;
+                     // services.AddDataLayerDependencies(configuration);
+
+                     var conncetionsString = configuration.GetConnectionString("DefaultString");
+                     services.AddDbContext<UniversityContext>(opt =>
+                     {
+                         opt.UseSqlServer(conncetionsString);
+                     });
+
+                     services.AddTransient<IUnitOfWork, UnitOfWork>();
+
+                     // Services
+                     services.AddScoped<ICourseService, CourseService>();
+                     services.AddScoped<IGroupService, GroupService>();
+                     services.AddTransient<IWindowService, WindowService>();
+
+                     // ViewModels
+                     services.AddTransient<MainViewModel>();
+                     services.AddTransient<GroupsViewModel>();
+
+                     // Views
+                     services.AddTransient<MainWindow>();
+                     services.AddTransient<GroupsWindow>();
+
+                     services.AddTransient<IGroupsViewModelFactory, GroupsViewModelFactory>();
+                     services.AddTransient<IGroupsWindowFactory, GroupsWindowFactory>();
+                 })
                 .Build();
         }
 
@@ -64,26 +71,16 @@ namespace WpfUniversity
             await AppHost!.StartAsync();
 
             var starupForm = AppHost!.Services.GetRequiredService<MainWindow>();
-            starupForm.Show();           
+            starupForm.Show();
 
             base.OnStartup(e);
         }
 
-        protected override  async void OnExit(ExitEventArgs e)
+        protected override async void OnExit(ExitEventArgs e)
         {
             await AppHost!.StopAsync();
 
             base.OnExit(e);
-        }
-
-        private CourseViewModel CreateCourseViewModel(IServiceProvider services)
-        {
-            return CourseViewModel.LoadViewModel(
-                services.GetRequiredService<CourseService>(),
-                services.GetRequiredService<SelectedCourseService>(),
-                services.GetRequiredService<GroupService>(),
-                services.GetRequiredService<SelectedGroupService>(),
-                services.GetRequiredService<ModalNavigationService>());
         }
     }
 }

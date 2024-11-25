@@ -6,13 +6,22 @@
     <Nullable>enable</Nullable>
     <UseWPF>true</UseWPF>
     <Configurations>Debug;Release;</Configurations>
+    <AnalysisLevel>latest</AnalysisLevel>
   </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'" />
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'" />
 
   <ItemGroup>
     <Compile Remove="Helpers\**" />
+    <Compile Remove="ViewModels\Students\**" />
     <EmbeddedResource Remove="Helpers\**" />
+    <EmbeddedResource Remove="ViewModels\Students\**" />
     <None Remove="Helpers\**" />
+    <None Remove="ViewModels\Students\**" />
     <Page Remove="Helpers\**" />
+    <Page Remove="ViewModels\Students\**" />
   </ItemGroup>
 
   <ItemGroup>
@@ -34,9 +43,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Update="appsettings.json">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
     <None Update="appsettings.Production.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
@@ -46,16 +52,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="ViewModels\Students\" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Compile Update="Views\Courses\EditCourseView.xaml.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Update="Views\Errors\AddErrorView.xaml.cs">
-      <SubType>Code</SubType>
-    </Compile>
+    <Folder Include="ViewModels\Courses\" />
+    <Folder Include="Views\Courses\" />
   </ItemGroup>
 
   <ItemGroup>

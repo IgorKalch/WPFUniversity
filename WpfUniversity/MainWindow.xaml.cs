@@ -1,15 +1,16 @@
 ﻿using MvvmCross.Platforms.Wpf.Views;
-using UniversityDataLayer.UnitOfWorks;
-using WpfUniversity.ViewModels.Courses;
+using WpfUniversity.ViewModels;
 
-namespace WpfUniversity
+namespace WpfUniversity;
+
+public partial class MainWindow : MvxWindow
 {
-    public partial class MainWindow : MvxWindow
+    public MainWindow(MainViewModel viewModel)
     {
+        InitializeComponent();
 
-        public MainWindow() 
-        {
-            InitializeComponent();
-        }
+        DataContext = viewModel;
+
+        Loaded += async (s, e) => await viewModel.LoadCourses();
     }
 }
