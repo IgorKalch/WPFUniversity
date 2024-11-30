@@ -20,19 +20,17 @@ public class CourseService : ICourseService
 
     public async Task Load()
     {
-        Courses.Clear();
+        _courses.Clear();
 
-        var coursesToAdd = await Task.Run(() => _unitOfWork.CourseRepository.Get());
+        var coursesToAdd = await Task.Run(() => _unitOfWork.CourseRepository.GetAsync());
 
-        Courses.AddRange(coursesToAdd);
+        _courses.AddRange(coursesToAdd);
     }
 
     public async Task Add(Course course)
     {
         _unitOfWork.CourseRepository.Add(course);
         _unitOfWork.Commit();
-
-        await Load();
     }
 
     public async Task Update(Course course)
@@ -46,8 +44,6 @@ public class CourseService : ICourseService
 
             _unitOfWork.CourseRepository.Update(courseToUpdate);
             _unitOfWork.Commit();
-
-            await Load();
         }
         else
         {
@@ -59,7 +55,5 @@ public class CourseService : ICourseService
     {
         _unitOfWork.CourseRepository.Remove(course);
         _unitOfWork.Commit();
-
-        await Load();
     }
 }

@@ -10,7 +10,7 @@ public class GroupRepositiry : BaseRepository<Group>
     {
     }
 
-    public override IEnumerable<Group> Get(
+    public override async Task<IEnumerable<Group>> GetAsync(
             Expression<Func<Group, bool>> filter = null,
             Func<IQueryable<Group>, IOrderedQueryable<Group>> orderBy = null,
             params Expression<Func<Group, object>>[] includeProperties)
@@ -42,7 +42,7 @@ public class GroupRepositiry : BaseRepository<Group>
             }
         }
 
-        return (orderBy != null) ? orderBy(query).ToList() : query.ToList();
+        return (orderBy != null) ? await orderBy(query).ToListAsync() : await query.ToListAsync();
     }
 
     public override Group GetById(int id)

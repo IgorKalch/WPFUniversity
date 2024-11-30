@@ -1,6 +1,9 @@
-﻿using System.Collections.ObjectModel;
+﻿using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Windows.Controls;
 using System.Windows.Input;
 using UniversityDataLayer.Entities;
 using WpfUniversity.Commands;
@@ -11,17 +14,27 @@ namespace WpfUniversity.ViewModels;
 public class MainViewModel : ViewModelBase
 {
     private readonly ICourseService _courseService;
+    private readonly IGroupService _groupService;
     private readonly IWindowService _windowService;
 
-    public MainViewModel(ICourseService courseService, IWindowService windowService)
+    public MainViewModel(ICourseService courseService, IGroupService groupService, IWindowService windowService)
     {
         _courseService = courseService;
+        _groupService = groupService;
         _windowService = windowService;
 
         Courses = new ObservableCollection<Course>();
+
         LoadCoursesCommand = new AsyncRelayCommand(LoadCourses);
         NextPageCoursesCommand = new RelayCommand(NextPageCourses, () => CanGoToNextPageCourses);
         PreviousPageCoursesCommand = new RelayCommand(PreviousPageCourses, () => CanGoToPreviousPageCourses);
+
+        AddCourseCommand = new RelayCommand(AddCourse);
+        EditCourseCommand = new RelayCommand(EditCourse, () => IsCourseSelected);
+        DeleteCourseCommand = new RelayCommand(DeleteCourse, () => CanDeleteCourse);
+
+        OpenGroupsCommand = new RelayCommand(OpenGroups, () => SelectedCourse != null);
+        SortCommand = new RelayCommand<DataGridSortingEventArgs>(OnSortCommandExecuted);
     }
 
     public ObservableCollection<Course> Courses { get; set; }
@@ -32,15 +45,64 @@ public class MainViewModel : ViewModelBase
         get => _selectedCourse;
         set
         {
-            if (SetProperty(ref _selectedCourse, value) && value != null)
+            if (SetProperty(ref _selectedCourse, value))
             {
-                _windowService.OpenGroupsWindow(_selectedCourse);
+                OnPropertyChanged(nameof(IsCourseSelected));
+                OnPropertyChanged(nameof(CanDeleteCourse));
+
+                ((RelayCommand)EditCourseCommand).RaiseCanExecuteChanged();
+                ((RelayCommand)DeleteCourseCommand).RaiseCanExecuteChanged();
+            }
+        }
+    }
+
+    public bool IsCourseSelected => SelectedCourse != null;
+
+    public bool CanDeleteCourse
+    {
+        get
+        {
+            if (SelectedCourse == null)
+                return false;
+
+            var isHasGroup = SelectedCourse.Groups?.Any() ?? false;
+            //_groupService.HasGroups(SelectedCourse.Id);
+
+            return !isHasGroup;
+        }
+    }
+
+    private string _sortColumn;
+    private bool _sortAscending = true;
+
+    public string SortColumn
+    {
+        get => _sortColumn;
+        set
+        {
+            if (SetProperty(ref _sortColumn, value))
+            {
+                CurrentPageCourses = 1;
+                UpdateCoursesCollection();
+            }
+        }
+    }
+
+    public bool SortAscending
+    {
+        get => _sortAscending;
+        set
+        {
+            if (SetProperty(ref _sortAscending, value))
+            {
+                CurrentPageCourses = 1;
+                UpdateCoursesCollection();
             }
         }
     }
 
     private int _currentPageCourses = 1;
-    private int _itemsPerPageCourses = 10;
+    private int _itemsPerPageCourses = 20;
     private int _totalCourses;
 
     public int CurrentPageCourses
@@ -58,9 +120,14 @@ public class MainViewModel : ViewModelBase
     public bool CanGoToNextPageCourses => _currentPageCourses * _itemsPerPageCourses < _totalCourses;
     public bool CanGoToPreviousPageCourses => _currentPageCourses > 1;
 
+    public ICommand SortCommand { get; }
+    public ICommand OpenGroupsCommand { get; }
     public ICommand LoadCoursesCommand { get; }
     public ICommand NextPageCoursesCommand { get; }
     public ICommand PreviousPageCoursesCommand { get; }
+    public ICommand AddCourseCommand { get; }
+    public ICommand EditCourseCommand { get; }
+    public ICommand DeleteCourseCommand { get; }
 
     public async Task LoadCourses()
     {
@@ -70,11 +137,67 @@ public class MainViewModel : ViewModelBase
         UpdateCoursesCollection();
     }
 
+    private void OnSortCommandExecuted(DataGridSortingEventArgs e)
+    {
+        var column = e.Column;
+
+        e.Handled = true;
+
+        var sortMemberPath = column.SortMemberPath;
+        if (string.IsNullOrEmpty(sortMemberPath))
+        {
+            return;
+        }
+
+        if (SortColumn == sortMemberPath)
+        {
+            SortAscending = !SortAscending;
+        }
+        else
+        {
+            SortColumn = sortMemberPath;
+            SortAscending = true;
+        }
+
+        column.SortDirection = SortAscending ? ListSortDirection.Ascending : ListSortDirection.Descending;
+
+        UpdateCoursesCollection();
+    }
+
+    private void OpenGroups()
+    {
+        if (SelectedCourse != null)
+        {
+            _windowService.OpenGroupsWindow(SelectedCourse);
+        }
+    }
+
     private void UpdateCoursesCollection()
     {
-        var pagedCourses = _courseService.Courses
+        IEnumerable<Course> sortedCourses = _courseService.Courses;
+
+        if (!string.IsNullOrEmpty(SortColumn))
+        {
+            switch (SortColumn)
+            {
+                case "Id":
+                    sortedCourses = SortAscending ? sortedCourses.OrderBy(c => c.Id) : sortedCourses.OrderByDescending(c => c.Id);
+                    break;
+                case "Name":
+                    sortedCourses = SortAscending ? sortedCourses.OrderBy(c => c.Name) : sortedCourses.OrderByDescending(c => c.Name);
+                    break;
+                case "Description":
+                    sortedCourses = SortAscending ? sortedCourses.OrderBy(c => c.Description) : sortedCourses.OrderByDescending(c => c.Description);
+                    break;
+                default:
+                    break;
+            }
+        }
+
+        var pagedCourses = sortedCourses
             .Skip((_currentPageCourses - 1) * _itemsPerPageCourses)
-            .Take(_itemsPerPageCourses);
+            .Take(_itemsPerPageCourses)
+            .ToList();
 
         Courses.Clear();
         foreach (var course in pagedCourses)
@@ -98,6 +221,34 @@ public class MainViewModel : ViewModelBase
         {
             _currentPageCourses--;
             UpdateCoursesCollection();
+        }
+    }
+
+    private void AddCourse()
+    {
+        _windowService.OpenAddCourseWindow();
+        LoadCoursesCommand.Execute(null);
+    }
+
+    private void EditCourse()
+    {
+        if (SelectedCourse == null)
+            return;
+
+        _windowService.OpenEditCourseWindow(SelectedCourse);
+        LoadCoursesCommand.Execute(null);
+    }
+
+    private void DeleteCourse()
+    {
+        if (SelectedCourse == null)
+            return;
+
+        var result = _windowService.ShowConfirmationDialog("Are you sure you want to delete this course?", "Delete Confirmation");
+        if (result)
+        {
+            _courseService.Delete(SelectedCourse);
+            LoadCoursesCommand.Execute(null);
         }
     }
 }

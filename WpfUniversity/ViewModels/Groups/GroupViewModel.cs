@@ -1,91 +1,184 @@
-﻿using System.Collections.ObjectModel;
+﻿using System;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Windows;
 using System.Windows.Input;
 using UniversityDataLayer.Entities;
 using WpfUniversity.Commands;
 using WpfUniversity.Services.Interfaces;
 
 namespace WpfUniversity.ViewModels.Groups;
-public class GroupsViewModel : ViewModelBase
+
+public class GroupViewModel : ViewModelBase
 {
     private readonly IGroupService _groupService;
+    private readonly ITeacherService _teacherService;
+    private readonly IWindowService _windowService;
 
-    public GroupsViewModel(IGroupService groupService, Course course)
+    public GroupViewModel(IGroupService groupService, IWindowService windowService, ITeacherService teacherService)
     {
         _groupService = groupService;
-        Course = course;
+        _windowService = windowService;
+        _teacherService = teacherService;
 
-        Groups = new ObservableCollection<Group>();
-        LoadGroupsCommand = new AsyncRelayCommand(LoadGroups);
-
-        NextPageGroupsCommand = new RelayCommand(NextPageGroups, () => CanGoToNextPageGroups);
-        PreviousPageGroupsCommand = new RelayCommand(PreviousPageGroups, () => CanGoToPreviousPageGroups);
-
-        _ = LoadGroups();
+        LoadTeachersCommand = new AsyncRelayCommand(LoadTeachersAsync);
+        SaveCommand = new AsyncRelayCommand(Save);
+        CancelCommand = new RelayCommand(Cancel);
     }
-    public Course Course { get; }
-    public ObservableCollection<Group> Groups { get; set; }
 
-    private int _currentPageGroups = 1;
-    private int _itemsPerPageGroups = 10;
-    private int _totalGroups;
+    public string WindowTitle { get; set; }
+    public ObservableCollection<Teacher> Teachers { get; set; } = new ObservableCollection<Teacher>();
 
-    public int CurrentPageGroups
+    private Teacher _selectedTeacher;
+
+    public Teacher SelectedTeacher
     {
-        get => _currentPageGroups;
-        set
+        get => _selectedTeacher;
+        set => SetProperty(ref _selectedTeacher, value);
+    }
+
+    private string _name;
+    public string Name
+    {
+        get => _name;
+        set => SetProperty(ref _name, value);
+    }
+
+    private int _teacherId;
+    public int TeacherId
+    {
+        get => _teacherId;
+        set => SetProperty(ref _teacherId, value);
+    }
+
+    private int _courseId;
+    public int CourseId
+    {
+        get => _courseId;
+        set => SetProperty(ref _courseId, value);
+    }
+
+    public ICommand LoadTeachersCommand { get; }
+    public ICommand SaveCommand { get; }
+    public ICommand CancelCommand { get; }
+
+    public bool IsSaved { get; private set; }
+
+    private Group _group;
+    public bool IsEditMode { get; private set; }
+
+    public void SetGroup(Group group)
+    {
+        _group = group;
+        IsEditMode = true;
+
+        Name = group.Name;
+        CourseId = group.CourseId;
+        TeacherId = group.TeacherId;
+
+        WindowTitle = "Edit Group";
+        OnPropertyChanged(nameof(WindowTitle));
+        LoadTeachersCommand.Execute(this);
+    }
+
+    public void SetAddMode(int courseId)
+    {
+        IsEditMode = false;
+        WindowTitle = "Add Group";
+        CourseId = courseId;
+        OnPropertyChanged(nameof(WindowTitle));
+        LoadTeachersCommand.Execute(this);
+    }
+    private async Task LoadTeachersAsync()
+    {
+        var teachers = await _teacherService.GetAllTeachersByCourseIdAsync(CourseId);
+
+        Teachers.Clear();
+        foreach (var teacher in teachers)
         {
-            if (SetProperty(ref _currentPageGroups, value))
+            Teachers.Add(teacher);
+        }
+    }
+
+    private async Task Save()
+    {
+        try
+        {
+
+            if (string.IsNullOrWhiteSpace(Name))
             {
-                UpdateGroupsCollection();
+                _windowService.ShowErrorDialog("Name is required.", "Error");
+                return;
             }
+
+            if (SelectedTeacher is null)
+            {
+                _windowService.ShowErrorDialog("Teacher is required.", "Error");
+                return;
+            }
+
+            bool isUnique = await _groupService.IsGroupNameUniqueAsync(Name, IsEditMode ? (int?)_group.Id : null);
+            if (!isUnique)
+            {
+                _windowService.ShowErrorDialog("A group with this name already exists. Please choose a different name.", "Validation Error");
+                return;
+            }
+
+            if (IsEditMode)
+            {
+                _group.Name = Name;
+                _group.CourseId = CourseId;
+                _group.TeacherId = SelectedTeacher.Id;
+
+                _groupService.Update(_group);
+            }
+            else
+            {
+                var newGroup = new Group
+                {
+                    Name = Name,
+                    CourseId = CourseId,
+                    TeacherId = SelectedTeacher.Id,
+                };
+                await _groupService.Add(newGroup);
+            }
+
+            IsSaved = true;
+
+            CloseWindow();
         }
-    }
-
-    public bool CanGoToNextPageGroups => _currentPageGroups * _itemsPerPageGroups < _totalGroups;
-    public bool CanGoToPreviousPageGroups => _currentPageGroups > 1;
-
-    public ICommand LoadGroupsCommand { get; }
-    public ICommand NextPageGroupsCommand { get; }
-    public ICommand PreviousPageGroupsCommand { get; }
-
-    public async Task LoadGroups()
-    {
-        await _groupService.LoadGroupsByCourseId(Course.Id);
-
-        _totalGroups = _groupService.Groups.Count;
-        UpdateGroupsCollection();
-    }
-
-    private void UpdateGroupsCollection()
-    {
-        var pagedGroups = _groupService.Groups
-            .Skip((_currentPageGroups - 1) * _itemsPerPageGroups)
-            .Take(_itemsPerPageGroups);
-
-        Groups.Clear();
-        foreach (var group in pagedGroups)
+        catch (Exception ex)
         {
-            Groups.Add(group);
+            string userFriendlyMessage = $"An unexpected error occurred: {GetExceptionMessages(ex)}";
+
+            _windowService.ShowErrorDialog(userFriendlyMessage, "Error");
         }
-
-        OnPropertyChanged(nameof(CanGoToNextPageGroups));
-        OnPropertyChanged(nameof(CanGoToPreviousPageGroups));
     }
 
-    private void NextPageGroups()
+    private void Cancel()
     {
-        _currentPageGroups++;
-        UpdateGroupsCollection();
+        IsSaved = false;
+        CloseWindow();
     }
 
-    private void PreviousPageGroups()
+    private void CloseWindow()
     {
-        if (_currentPageGroups > 1)
+        if (Application.Current.Windows.OfType<Window>().FirstOrDefault(w => w.DataContext == this) is Window window)
         {
-            _currentPageGroups--;
-            UpdateGroupsCollection();
+            window.Close();
         }
+    }
+    private string GetExceptionMessages(Exception ex)
+    {
+        if (ex == null)
+            return string.Empty;
+
+        string message = ex.Message;
+        if (ex.InnerException != null)
+        {
+            message += " --> " + GetExceptionMessages(ex.InnerException);
+        }
+        return message;
     }
 }

@@ -5,10 +5,11 @@ namespace UniversityDataLayer.UnitOfWorks;
 
 public interface IUnitOfWork : IDisposable
 {
-   BaseRepository<Course> CourseRepository { get; }
-   BaseRepository<Group> GroupRepository { get; }
-   BaseRepository<Student> StudentRepository { get; }
-   BaseRepository<Teacher> TeacherRepository { get; }
+    BaseRepository<Course> CourseRepository { get; }
+    BaseRepository<Group> GroupRepository { get; }
+    BaseRepository<Student> StudentRepository { get; }
+    BaseRepository<Teacher> TeacherRepository { get; }
 
-   void Commit();
+    void Commit();
+    Task CommitAsync();
 }

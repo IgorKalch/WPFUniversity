@@ -1,5 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
-using UniversityDataLayer.Entities;
+﻿using UniversityDataLayer.Entities;
 using UniversityDataLayer.Repositories;
 
 namespace UniversityDataLayer.UnitOfWorks;
@@ -22,12 +21,17 @@ public class UnitOfWork : IUnitOfWork
     public UnitOfWork(UniversityContext dbContext)
     {
         _dbContext = dbContext;
-    }     
+    }
 
     public void Commit()
     {
         _dbContext.SaveChanges();
-    }    
+    }
+
+    public async Task CommitAsync()
+    {
+        await _dbContext.SaveChangesAsync();
+    }
 
     public virtual void Dispose(bool disposing)
     {
@@ -44,6 +48,5 @@ public class UnitOfWork : IUnitOfWork
     public void Dispose()
     {
         Dispose(true);
-        GC.SuppressFinalize(this);
     }
 }

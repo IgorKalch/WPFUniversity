@@ -8,14 +8,16 @@ namespace WpfUniversity.WindowFactories;
 public class GroupsViewModelFactory : IGroupsViewModelFactory
 {
     private readonly IGroupService _groupService;
+    private readonly ITeacherService _teacherService;
 
-    public GroupsViewModelFactory(IGroupService groupService)
+    public GroupsViewModelFactory(IGroupService groupService, ITeacherService teacherService)
     {
         _groupService = groupService;
+        _teacherService = teacherService;
     }
 
-    public GroupsViewModel Create(Course selectedCourse)
+    public GroupsViewModel Create(Course selectedCourse, IWindowService windowService)
     {
-        return new GroupsViewModel(_groupService, selectedCourse);
+        return new GroupsViewModel(_groupService, windowService, _teacherService, selectedCourse);
     }
 }

@@ -9,7 +9,7 @@ public class CourseRepository : BaseRepository<Course>
     public CourseRepository(UniversityContext context) : base(context)
     {
     }
-    public override IEnumerable<Course> Get(
+    public override async Task<IEnumerable<Course>> GetAsync(
             Expression<Func<Course, bool>> filter = null,
             Func<IQueryable<Course>, IOrderedQueryable<Course>> orderBy = null,
             params Expression<Func<Course, object>>[] includeProperties)
@@ -35,7 +35,7 @@ public class CourseRepository : BaseRepository<Course>
             }
         }
 
-        return (orderBy != null) ? orderBy(query).ToList() : query.ToList();
+        return (orderBy != null) ? await orderBy(query).ToListAsync() : await query.ToListAsync();
     }
 
     public override Course? GetById(int id)

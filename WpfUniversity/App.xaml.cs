@@ -11,9 +11,16 @@ using UniversityDataLayer.UnitOfWorks;
 using WpfUniversity.Services;
 using WpfUniversity.Services.Courses;
 using WpfUniversity.Services.Interfaces;
+using WpfUniversity.Services.Students;
 using WpfUniversity.ViewModels;
+using WpfUniversity.ViewModels.Courses;
+using WpfUniversity.ViewModels.Dialogs;
 using WpfUniversity.ViewModels.Groups;
+using WpfUniversity.ViewModels.Students;
+using WpfUniversity.Views.Courses;
+using WpfUniversity.Views.Dialogs;
 using WpfUniversity.Views.Groups;
+using WpfUniversity.Views.Students;
 using WpfUniversity.WindowFactories;
 using WpfUniversity.WindowFactories.Interfaces;
 
@@ -45,23 +52,42 @@ namespace WpfUniversity
                          opt.UseSqlServer(conncetionsString);
                      });
 
-                     services.AddTransient<IUnitOfWork, UnitOfWork>();
+                     services.AddScoped<IUnitOfWork, UnitOfWork>();
 
                      // Services
                      services.AddScoped<ICourseService, CourseService>();
                      services.AddScoped<IGroupService, GroupService>();
-                     services.AddTransient<IWindowService, WindowService>();
+                     services.AddScoped<IStudentService, StudentService>();
+                     services.AddScoped<ITeacherService, TeacherService>();
+                     services.AddScoped<IWindowService, WindowService>();
 
                      // ViewModels
                      services.AddTransient<MainViewModel>();
+                     services.AddTransient<CourseViewModel>();
                      services.AddTransient<GroupsViewModel>();
+                     services.AddTransient<GroupViewModel>();
+                     services.AddTransient<StudentsViewModel>();
+                     services.AddTransient<StudentViewModel>();
+                     services.AddTransient<ConfirmationDialogViewModel>();
+                     services.AddTransient<ErrorDialogViewModel>();
 
                      // Views
                      services.AddTransient<MainWindow>();
+                     services.AddTransient<CourseWindow>();
                      services.AddTransient<GroupsWindow>();
+                     services.AddTransient<GroupWindow>();
+                     services.AddTransient<StudentsWindow>();
+                     services.AddTransient<StudentWindow>();
 
+                     // Dialogs
+                     services.AddTransient<ConfirmationDialog>();
+                     services.AddTransient<ErrorDialog>();
+
+                     // Factories
                      services.AddTransient<IGroupsViewModelFactory, GroupsViewModelFactory>();
                      services.AddTransient<IGroupsWindowFactory, GroupsWindowFactory>();
+                     services.AddTransient<IStudentsViewModelFactory, StudentsViewModelFactory>();
+                     services.AddTransient<IStudentsWindowFactory, StudentsWindowFactory>();
                  })
                 .Build();
         }

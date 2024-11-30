@@ -1,6 +1,9 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using System;
+using System.Windows;
 using UniversityDataLayer.Entities;
+using WpfUniversity.Services;
+using WpfUniversity.ViewModels.Groups;
 using WpfUniversity.Views.Groups;
 using WpfUniversity.WindowFactories.Interfaces;
 
@@ -17,13 +20,25 @@ public class GroupsWindowFactory : IGroupsWindowFactory
         _serviceProvider = serviceProvider;
     }
 
-    public GroupsWindow Create(Course selectedCourse)
+    public GroupsWindow Create(Course selectedCourse, WindowService windowService)
     {
-        var groupsWindow = _serviceProvider.GetRequiredService<GroupsWindow>();
+        foreach (Window window in Application.Current.Windows)
+        {
+            if (window is GroupsWindow groupsWindow)
+            {
+                var viewModel = groupsWindow.DataContext as GroupsViewModel;
+                if (viewModel != null && viewModel.Course.Id == selectedCourse.Id)
+                {
+                    groupsWindow.Activate();
+                    return groupsWindow;
+                }
+            }
+        }
 
-        var groupsViewModel = _groupsViewModelFactory.Create(selectedCourse);
-        groupsWindow.DataContext = groupsViewModel;
+        var newGroupsWindow = _serviceProvider.GetRequiredService<GroupsWindow>();
+        var groupsViewModel = _groupsViewModelFactory.Create(selectedCourse, windowService);
+        newGroupsWindow.DataContext = groupsViewModel;
 
-        return groupsWindow;
+        return newGroupsWindow;
     }
 }

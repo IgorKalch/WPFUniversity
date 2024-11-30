@@ -1,15 +1,11 @@
 ﻿using MvvmCross.Platforms.Wpf.Views;
 
-namespace WpfUniversity.Views.Groups
+namespace WpfUniversity.Views.Groups;
+
+public partial class GroupsWindow : MvxWindow
 {
-    /// <summary>
-    /// Interaction logic for GroupsWindow.xaml
-    /// </summary>
-    public partial class GroupsWindow : MvxWindow
+    public GroupsWindow()
     {
-        public GroupsWindow()
-        {
-            InitializeComponent();
-        }
+        InitializeComponent();
     }
 }

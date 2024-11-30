@@ -56,6 +56,9 @@ public class RelayCommand<T> : ICommand
         add { CommandManager.RequerySuggested += value; }
         remove { CommandManager.RequerySuggested -= value; }
     }
+    public RelayCommand(Action<T> execute) : this(execute, null)
+    {
+    }
 
     public RelayCommand(Action<T> execute, Predicate<T> canExecute = null)
     {
@@ -71,6 +74,11 @@ public class RelayCommand<T> : ICommand
     public void Execute(object parameter)
     {
         _execute((T)parameter);
+    }
+
+    public void RaiseCanExecuteChanged()
+    {
+        CommandManager.InvalidateRequerySuggested();
     }
 }
 

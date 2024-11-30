@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using UniversityDataLayer.Entities;
 using UniversityDataLayer.UnitOfWorks;
@@ -19,11 +20,16 @@ public class GroupService : IGroupService
         _unitOfWork = unitOfWork;
     }
 
+    public bool HasGroups(int courseId)
+    {
+        return _unitOfWork.GroupRepository.Get(g => g.CourseId == courseId).Any();
+    }
+
     public async Task LoadGroupsByCourseId(int courseId)
     {
         Groups.Clear();
 
-        var groupsToAdd = _unitOfWork.GroupRepository.Get(x => x.CourseId == courseId);
+        var groupsToAdd = await _unitOfWork.GroupRepository.GetAsync(x => x.CourseId == courseId);
 
         foreach (var group in groupsToAdd)
         {
@@ -35,7 +41,7 @@ public class GroupService : IGroupService
     public async Task Add(Group group)
     {
         _unitOfWork.GroupRepository.Add(group);
-        _unitOfWork.Commit();
+        await _unitOfWork.CommitAsync();
     }
 
     public async Task Update(Group group)
@@ -61,5 +67,20 @@ public class GroupService : IGroupService
     {
         _unitOfWork.GroupRepository.Remove(group);
         _unitOfWork.Commit();
+    }
+
+    public async Task<bool> IsGroupNameUniqueAsync(string name, int? groupId = null)
+    {
+        if (groupId.HasValue)
+        {
+            var groups = await _unitOfWork.GroupRepository.GetAsync(g => g.Name == name && g.Id != groupId.Value);
+            return !groups.Any();
+        }
+        else
+        {
+            var groups = await _unitOfWork.GroupRepository.GetAsync(g => g.Name == name);
+
+            return !groups.Any();
+        }
     }
 }
