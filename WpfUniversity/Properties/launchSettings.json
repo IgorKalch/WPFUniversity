@@ -1,0 +1,18 @@
+{
+  "profiles": {
+    "WpfUniversityDev": {
+      "commandName": "Project",
+      "environmentVariables": {
+        "DOTNET_ENVIRONMENT": "Development"
+      },
+      "nativeDebugging": false,
+      "sqlDebugging": true
+    },
+    "WpfUniversityProduction": {
+      "commandName": "Project",
+      "environmentVariables": {
+        "DOTNET_ENVIRONMENT": "Production"
+      }
+    }
+  }
+}
