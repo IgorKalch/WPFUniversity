@@ -1,6 +1,10 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
+using System.Linq;
 using System.Threading.Tasks;
+using System.Windows.Controls;
 using System.Windows.Input;
 using UniversityDataLayer.Entities;
 using WpfUniversity.Commands;
@@ -65,6 +69,11 @@ public class TeachersViewModel : ViewModelBase
     public ICommand AddTeacherCommand { get; }
     public ICommand EditTeacherCommand { get; }
     public ICommand DeleteTeacherCommand { get; }
+    public ICommand NextPageTeachersCommand { get; }
+    public ICommand PreviousPageTeachersCommand { get; }
+    public ICommand LoadTeacherCommand { get; }
+
+    public ICommand SortCommand { get; }
 
     public TeachersViewModel(IWindowService windowService, ITeacherService teacherService, ICourseService courseService)
     {
@@ -77,30 +86,90 @@ public class TeachersViewModel : ViewModelBase
 
         AddTeacherCommand = new AsyncRelayCommand(AddTeacherAsync, () => !IsBusy);
         EditTeacherCommand = new AsyncRelayCommand(EditTeacherAsync, () => IsTeacherSelected && !IsBusy);
-        DeleteTeacherCommand = new AsyncRelayCommand(DeleteTeacherAsync, () => CanDeleteTeacher && !IsBusy);
+        DeleteTeacherCommand = new AsyncRelayCommand(DeleteTeacherAsync, () => (CanDeleteTeacher && !IsBusy));
+        LoadTeacherCommand = new AsyncRelayCommand(LoadTeachersAsync);
 
-        Task.Run(async () => await LoadTeachersAsync());
+        SortCommand = new RelayCommand<DataGridSortingEventArgs>(OnSortCommandExecuted);
+        NextPageTeachersCommand = new RelayCommand(NextPageTeachers, () => CanGoToNextPageTeachers);
+        PreviousPageTeachersCommand = new RelayCommand(PreviousPageTeachers, () => CanGoToPreviousPageTeachers);
+
+        LoadTeacherCommand.Execute(this);
     }
+
+
+    private int _currentPageTeachers = 1;
+    private int _itemsPerPageTeachers = 20;
+    private int _totalTeachers;
+    public int PageSizeTeachers
+    {
+        get => _itemsPerPageTeachers;
+        set
+        {
+            if (SetProperty(ref _itemsPerPageTeachers, value))
+            {
+                UpdateTeachersCollection();
+            }
+        }
+    }
+    public int CurrentPageTeachers
+    {
+        get => _currentPageTeachers;
+        set
+        {
+            if (SetProperty(ref _currentPageTeachers, value))
+            {
+                UpdateTeachersCollection();
+            }
+        }
+    }
+
+
+    private string _sortColumn;
+    private bool _sortAscending = true;
+
+    public string SortColumn
+    {
+        get => _sortColumn;
+        set
+        {
+            if (SetProperty(ref _sortColumn, value))
+            {
+                CurrentPageTeachers = 1;
+                UpdateTeachersCollection();
+            }
+        }
+    }
+
+    public bool SortAscending
+    {
+        get => _sortAscending;
+        set
+        {
+            if (SetProperty(ref _sortAscending, value))
+            {
+                CurrentPageTeachers = 1;
+                UpdateTeachersCollection();
+            }
+        }
+    }
+
+
+    public bool CanGoToNextPageTeachers => _currentPageTeachers * _itemsPerPageTeachers < _totalTeachers;
+    public bool CanGoToPreviousPageTeachers => _currentPageTeachers > 1;
+
 
     private async Task LoadTeachersAsync()
     {
         try
         {
             IsBusy = true;
-            var teachers = await _teacherService.GetAllTeachersAsync();
-            var courses = await _courseService.GetAllCoursesAsync();
+            await _teacherService.Load();
+            await _courseService.Load();
 
-            Teachers.Clear();
-            foreach (var teacher in teachers)
-            {
-                Teachers.Add(teacher);
-            }
+            _totalTeachers = _teacherService.Teachers.Count;
 
-            Courses.Clear();
-            foreach (var course in courses)
-            {
-                Courses.Add(course);
-            }
+
+            UpdateTeachersCollection();
         }
         catch (Exception ex)
         {
@@ -115,15 +184,14 @@ public class TeachersViewModel : ViewModelBase
     private async Task AddTeacherAsync()
     {
         var teacher = new Teacher();
-        var isSaved = _windowService.OpenTeacherDialog(teacher, "Add Teacher");
+        var isSaved = _windowService.OpenTeacherDialog(null, "Add Teacher");
         if (isSaved)
         {
             try
             {
                 IsBusy = true;
-                await _teacherService.AddTeacherAsync(teacher);
-                Teachers.Add(teacher);
-                _windowService.ShowMessageDialog("Teacher added successfully.", "Success");
+
+                LoadTeacherCommand.Execute(this);
             }
             catch (Exception ex)
             {
@@ -141,31 +209,14 @@ public class TeachersViewModel : ViewModelBase
         if (SelectedTeacher == null)
             return;
 
-        var teacherCopy = new Teacher
-        {
-            Id = SelectedTeacher.Id,
-            FirstName = SelectedTeacher.FirstName,
-            LastName = SelectedTeacher.LastName,
-            Subject = SelectedTeacher.Subject,
-            CourseId = SelectedTeacher.CourseId
-        };
-
-        var isSaved = _windowService.OpenTeacherDialog(teacherCopy, "Edit Teacher");
+        var isSaved = _windowService.OpenTeacherDialog(SelectedTeacher, "Edit Teacher");
         if (isSaved)
         {
             try
             {
                 IsBusy = true;
-                await _teacherService.UpdateTeacherAsync(teacherCopy);
-
-                SelectedTeacher.FirstName = teacherCopy.FirstName;
-                SelectedTeacher.LastName = teacherCopy.LastName;
-                SelectedTeacher.Subject = teacherCopy.Subject;
-                SelectedTeacher.CourseId = teacherCopy.CourseId;
-                SelectedTeacher.Course = await _courseService.GetCourseByIdAsync(teacherCopy.CourseId);
-
-                OnPropertyChanged(nameof(Teachers));
-                _windowService.ShowMessageDialog("Teacher updated successfully.", "Success");
+                LoadTeacherCommand.Execute(this);
+                OnPropertyChanged(nameof(SelectedTeacher));
             }
             catch (Exception ex)
             {
@@ -189,7 +240,7 @@ public class TeachersViewModel : ViewModelBase
             try
             {
                 IsBusy = true;
-                await _teacherService.DeleteTeacherAsync(SelectedTeacher.Id);
+                await _teacherService.DeleteTeacherAsync(SelectedTeacher);
                 Teachers.Remove(SelectedTeacher);
                 _windowService.ShowMessageDialog("Teacher deleted successfully.", "Success");
             }
@@ -202,5 +253,86 @@ public class TeachersViewModel : ViewModelBase
                 IsBusy = false;
             }
         }
+    }
+
+    private void UpdateTeachersCollection()
+    {
+        IEnumerable<Teacher> sortedTeachers = _teacherService.Teachers;
+
+        if (!string.IsNullOrEmpty(SortColumn))
+        {
+            switch (SortColumn)
+            {
+                case "Id":
+                    sortedTeachers = SortAscending ? sortedTeachers.OrderBy(c => c.Id) : sortedTeachers.OrderByDescending(c => c.Id);
+                    break;
+                case "FullName":
+                    sortedTeachers = SortAscending ? sortedTeachers.OrderBy(c => c.FullName) : sortedTeachers.OrderByDescending(c => c.FullName);
+                    break;
+                case "Subject":
+                    sortedTeachers = SortAscending ? sortedTeachers.OrderBy(c => c.Subject) : sortedTeachers.OrderByDescending(c => c.Subject);
+                    break;
+                case "CourseName":
+                    sortedTeachers = SortAscending ? sortedTeachers.OrderBy(c => c.Course.Name) : sortedTeachers.OrderByDescending(c => c.Course.Name);
+                    break;
+                default:
+                    break;
+            }
+        }
+
+        var pagedCourses = sortedTeachers
+            .Skip((_currentPageTeachers - 1) * _itemsPerPageTeachers)
+            .Take(_itemsPerPageTeachers)
+            .ToList();
+
+        Teachers.Clear();
+        foreach (var teacher in pagedCourses)
+        {
+            Teachers.Add(teacher);
+        }
+
+        OnPropertyChanged(nameof(CanGoToNextPageTeachers));
+        OnPropertyChanged(nameof(CanGoToPreviousPageTeachers));
+    }
+
+    private void NextPageTeachers()
+    {
+        _currentPageTeachers++;
+        UpdateTeachersCollection();
+    }
+
+    private void PreviousPageTeachers()
+    {
+        if (_currentPageTeachers > 1)
+        {
+            _currentPageTeachers--;
+            UpdateTeachersCollection();
+        }
+    }
+    private void OnSortCommandExecuted(DataGridSortingEventArgs e)
+    {
+        var column = e.Column;
+
+        e.Handled = true;
+
+        var sortMemberPath = column.SortMemberPath;
+        if (string.IsNullOrEmpty(sortMemberPath))
+        {
+            return;
+        }
+
+        if (SortColumn == sortMemberPath)
+        {
+            SortAscending = !SortAscending;
+        }
+        else
+        {
+            SortColumn = sortMemberPath;
+            SortAscending = true;
+        }
+
+        column.SortDirection = SortAscending ? ListSortDirection.Ascending : ListSortDirection.Descending;
+
+        UpdateTeachersCollection();
     }
 }

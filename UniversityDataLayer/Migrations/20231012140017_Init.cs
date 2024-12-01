@@ -43,7 +43,7 @@ public partial class Init : Migration
                     column: x => x.CourseId,
                     principalTable: "Courses",
                     principalColumn: "Id",
-                    onDelete: ReferentialAction.Cascade);
+                    onDelete: ReferentialAction.NoAction);
             });
 
         migrationBuilder.CreateTable(
@@ -91,7 +91,7 @@ public partial class Init : Migration
                     column: x => x.GroupId,
                     principalTable: "Groups",
                     principalColumn: "Id",
-                    onDelete: ReferentialAction.Cascade);
+                    onDelete: ReferentialAction.NoAction);
             });
 
         migrationBuilder.CreateIndex(

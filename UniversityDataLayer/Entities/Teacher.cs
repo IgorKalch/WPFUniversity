@@ -1,6 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
-
-namespace UniversityDataLayer.Entities;
+﻿namespace UniversityDataLayer.Entities;
 
 public class Teacher : Entity
 {
@@ -11,7 +9,7 @@ public class Teacher : Entity
     public List<Group>? Groups { get; set; }
     public Course? Course { get; set; }
 
-    [NotMapped]
+
     public string FullName
     {
         get

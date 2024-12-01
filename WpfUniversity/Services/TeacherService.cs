@@ -9,7 +9,7 @@ namespace WpfUniversity.Services;
 public class TeacherService : ITeacherService
 {
     private readonly IUnitOfWork _unitOfWork;
-    private readonly List<Teacher> _teachers = [];
+    private List<Teacher> _teachers = [];
     public List<Teacher> Teachers => _teachers;
 
     public TeacherService(IUnitOfWork unitOfWork)
@@ -32,10 +32,17 @@ public class TeacherService : ITeacherService
         return result;
     }
 
-    public async Task<IEnumerable<Teacher>> GetAllTeachersAsync()
+    public async Task Load()
     {
-        return await _unitOfWork.TeacherRepository.GetAsync();
+        Teachers.Clear();
 
+        var teachers = await _unitOfWork.TeacherRepository.GetAsync();
+
+        foreach (var teacher in teachers)
+        {
+            var teacherToAdd = _unitOfWork.TeacherRepository.GetById(teacher.Id);
+            Teachers.Add(teacher);
+        }
     }
 
     public async Task<Teacher> GetTeacherByIdAsync(int id)
@@ -55,9 +62,8 @@ public class TeacherService : ITeacherService
         await _unitOfWork.CommitAsync();
     }
 
-    public async Task DeleteTeacherAsync(int id)
+    public async Task DeleteTeacherAsync(Teacher teacher)
     {
-        var teacher = _unitOfWork.TeacherRepository.GetById(id);
         if (teacher != null)
         {
             _unitOfWork.TeacherRepository.Remove(teacher);

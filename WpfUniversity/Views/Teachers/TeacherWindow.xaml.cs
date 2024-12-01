@@ -1,11 +1,15 @@
 ﻿using MvvmCross.Platforms.Wpf.Views;
 
-namespace WpfUniversity.Views.Teachers;
-
-public partial class TeacherWindow : MvxWindow
+namespace WpfUniversity.Views.Teachers
 {
-    public TeacherWindow()
+    /// <summary>
+    /// Interaction logic for Window2.xaml
+    /// </summary>
+    public partial class TeacherWindow : MvxWindow
     {
-        InitializeComponent();
+        public TeacherWindow()
+        {
+            InitializeComponent();
+        }
     }
 }

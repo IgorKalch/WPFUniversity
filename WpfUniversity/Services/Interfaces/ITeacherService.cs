@@ -6,10 +6,11 @@ namespace WpfUniversity.Services.Interfaces;
 
 public interface ITeacherService
 {
+    List<Teacher> Teachers { get; }
     Task<IEnumerable<Teacher>> GetAllTeachersByCourseIdAsync(int courseId);
-    Task<IEnumerable<Teacher>> GetAllTeachersAsync();
+    Task Load();
     Task<Teacher> GetTeacherByIdAsync(int id);
     Task AddTeacherAsync(Teacher teacher);
     Task UpdateTeacherAsync(Teacher teacher);
-    Task DeleteTeacherAsync(int id);
+    Task DeleteTeacherAsync(Teacher teacher);
 }

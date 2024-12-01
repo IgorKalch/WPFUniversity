@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.ObjectModel;
-using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Input;
 using UniversityDataLayer.Entities;
@@ -63,9 +62,8 @@ public class TeacherViewModel : ViewModelBase
 
         Teacher = teacher ?? new Teacher();
         WindowTitle = teacher == null ? "Add Teacher" : "Edit Teacher";
-        Courses = new ObservableCollection<Course>();
 
-        SaveCommand = new AsyncRelayCommand(SaveAsync, () => CanSave);
+        SaveCommand = new AsyncRelayCommand(SaveAsync);
         CancelCommand = new RelayCommand(Cancel, () => !IsBusy);
 
         Task.Run(async () => await LoadCoursesAsync());
@@ -76,21 +74,8 @@ public class TeacherViewModel : ViewModelBase
         try
         {
             IsBusy = true;
-            var courses = await _courseService.GetAllCoursesAsync();
-            Courses.Clear();
-            foreach (var course in courses)
-            {
-                Courses.Add(course);
-            }
-
-            if (Teacher.Course != null)
-            {
-                var existingCourse = Courses.FirstOrDefault(c => c.Id == Teacher.CourseId);
-                if (existingCourse != null)
-                {
-                    Teacher.Course = existingCourse;
-                }
-            }
+            await _courseService.Load();
+            Courses = new ObservableCollection<Course>(_courseService.Courses);
         }
         catch (Exception ex)
         {
@@ -107,22 +92,32 @@ public class TeacherViewModel : ViewModelBase
     {
         get
         {
-            return !IsBusy && !string.IsNullOrWhiteSpace(Teacher.FirstName) && !string.IsNullOrWhiteSpace(Teacher.LastName) && Teacher.Course != null;
+            return !string.IsNullOrWhiteSpace(Teacher.FirstName) && !string.IsNullOrWhiteSpace(Teacher.LastName) && Teacher.Course != null;
         }
     }
 
     private async Task SaveAsync()
     {
-        if (!CanSave)
-            return;
-
         try
         {
             IsBusy = true;
 
+            if (string.IsNullOrWhiteSpace(Teacher.FirstName) || string.IsNullOrWhiteSpace(Teacher.LastName) || Teacher.Course == null)
+            {
+                _windowService.ShowMessageDialog("All fields are reqieried", "Validation Error");
+                return;
+            }
+
             if (Teacher.Id == 0)
             {
-                await _teacherService.AddTeacherAsync(Teacher);
+                var teacherToAdd = new Teacher()
+                {
+                    FirstName = Teacher.FirstName,
+                    LastName = Teacher.LastName,
+                    CourseId = Teacher.Course.Id,
+                    Subject = Teacher.Subject,
+                };
+                await _teacherService.AddTeacherAsync(teacherToAdd);
                 _windowService.ShowMessageDialog("Teacher added successfully.", "Success");
             }
             else
