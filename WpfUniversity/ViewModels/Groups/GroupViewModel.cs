@@ -108,20 +108,20 @@ public class GroupViewModel : ViewModelBase
 
             if (string.IsNullOrWhiteSpace(Name))
             {
-                _windowService.ShowErrorDialog("Name is required.", "Error");
+                _windowService.ShowMessageDialog("Name is required.", "Error");
                 return;
             }
 
             if (SelectedTeacher is null)
             {
-                _windowService.ShowErrorDialog("Teacher is required.", "Error");
+                _windowService.ShowMessageDialog("Teacher is required.", "Error");
                 return;
             }
 
             bool isUnique = await _groupService.IsGroupNameUniqueAsync(Name, IsEditMode ? (int?)_group.Id : null);
             if (!isUnique)
             {
-                _windowService.ShowErrorDialog("A group with this name already exists. Please choose a different name.", "Validation Error");
+                _windowService.ShowMessageDialog("A group with this name already exists. Please choose a different name.", "Validation Error");
                 return;
             }
 
@@ -152,7 +152,7 @@ public class GroupViewModel : ViewModelBase
         {
             string userFriendlyMessage = $"An unexpected error occurred: {GetExceptionMessages(ex)}";
 
-            _windowService.ShowErrorDialog(userFriendlyMessage, "Error");
+            _windowService.ShowMessageDialog(userFriendlyMessage, "Error");
         }
     }
 

@@ -10,6 +10,10 @@
                Title="GroupsWindow" 
                SizeToContent="Height"
                Width="800">
+    <views:MvxWindow.Resources>
+        <converters:RowNumberConverter x:Key="RowNumberConverter"/>
+        <converters:InverseBooleanConverter x:Key="InverseBooleanConverter"/>
+    </views:MvxWindow.Resources>
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
@@ -47,7 +51,25 @@
                 </i:EventTrigger>
             </i:Interaction.Triggers>
             <DataGrid.Columns>
-                <DataGridTextColumn Header="ID" Binding="{Binding Id}" Width="Auto" SortMemberPath="Id"/>
+                <DataGridTemplateColumn Header="#" Width="Auto" IsReadOnly="True" SortMemberPath="Id">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <TextBlock FontWeight="Bold" HorizontalAlignment="Center">
+                                <TextBlock.Text>
+                                    <MultiBinding Converter="{StaticResource RowNumberConverter}">
+                                        <!-- Bind to the DataGridRow -->
+                                        <Binding RelativeSource="{RelativeSource AncestorType=DataGridRow}" />
+                                        <!-- Bind to Current Page -->
+                                        <Binding Path="DataContext.CurrentPageGroups" RelativeSource="{RelativeSource AncestorType=DataGrid}" />
+                                        <!-- Bind to Page Size -->
+                                        <Binding Path="DataContext.PageSizeGroups" RelativeSource="{RelativeSource AncestorType=DataGrid}" />
+                                    </MultiBinding>
+                                </TextBlock.Text>
+                            </TextBlock>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+
                 <DataGridTextColumn Header="Name" Binding="{Binding Name}" Width="*" SortMemberPath="Name"/>
                 <DataGridTextColumn Header="Teacher" Binding="{Binding Techer.FullName}" Width="*" SortMemberPath="Teacher.FullName"/>
             </DataGrid.Columns>
@@ -60,14 +82,22 @@
                 <Button Content="Add Group" Command="{Binding AddGroupCommand}" Width="100" Margin="0,0,5,0"/>
                 <Button Content="Edit Group" Command="{Binding EditGroupCommand}" Width="100" Margin="0,0,5,0"
                         IsEnabled="{Binding IsGroupSelected}"/>
-                <Button Content="Remove Group" Command="{Binding RemoveGroupCommand}" Width="100"
+                <Button Content="Remove Group" Command="{Binding RemoveGroupCommand}" Width="120"
                         IsEnabled="{Binding CanRemoveGroup}"/>
+                <!-- Export Buttons -->
+                <Button Content="Export to DOCX" Command="{Binding ExportToDocxCommand}" Width="140" Margin="20,0,5,0"
+                         IsEnabled="{Binding IsGroupSelected}"/>
+                <Button Content="Export to PDF" Command="{Binding ExportToPdfCommand}" Width="120" Margin="0,0,5,0"
+                        IsEnabled="{Binding IsGroupSelected}"/>
+                        <!--IsEnabled="{Binding IsBusy, Converter={StaticResource InverseBooleanConverter}}"-->
+                       
+
             </StackPanel>
 
             <!-- Pagination Controls -->
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
                 <Button Content="Previous" Command="{Binding PreviousPageGroupsCommand}" 
-                        IsEnabled="{Binding CanGoToPreviousPageGroups}" Width="80" Margin="5,0"/>
+                        IsEnabled="{Binding CanGoToPreviousPageGroups}" Width="100" Margin="5,0"/>
                 <TextBlock Text="Page" VerticalAlignment="Center" Margin="10,0"/>
                 <TextBlock Text="{Binding CurrentPageGroups}" VerticalAlignment="Center" FontWeight="Bold"/>
                 <Button Content="Next" Command="{Binding NextPageGroupsCommand}" 

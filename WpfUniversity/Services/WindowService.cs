@@ -1,6 +1,8 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Win32;
 using System;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Windows;
 using UniversityDataLayer.Entities;
 using WpfUniversity.Services.Interfaces;
@@ -8,10 +10,12 @@ using WpfUniversity.ViewModels.Courses;
 using WpfUniversity.ViewModels.Dialogs;
 using WpfUniversity.ViewModels.Groups;
 using WpfUniversity.ViewModels.Students;
+using WpfUniversity.ViewModels.Teachers;
 using WpfUniversity.Views.Courses;
 using WpfUniversity.Views.Dialogs;
 using WpfUniversity.Views.Groups;
 using WpfUniversity.Views.Students;
+using WpfUniversity.Views.Teachers;
 using WpfUniversity.WindowFactories.Interfaces;
 
 namespace WpfUniversity.Services;
@@ -21,12 +25,14 @@ public class WindowService : IWindowService
     private readonly IGroupsWindowFactory _groupsWindowFactory;
     private readonly IStudentsWindowFactory _studentsWindowFactory;
     private readonly IServiceProvider _serviceProvider;
+    private readonly ITeacherViewModelFactory _teacherViewModelFactory;
 
-    public WindowService(IGroupsWindowFactory groupsWindowFactory, IStudentsWindowFactory studentsWindowFactory, IServiceProvider serviceProvider)
+    public WindowService(IGroupsWindowFactory groupsWindowFactory, IStudentsWindowFactory studentsWindowFactory, IServiceProvider serviceProvider, ITeacherViewModelFactory teacherViewModelFactory)
     {
         _groupsWindowFactory = groupsWindowFactory;
         _studentsWindowFactory = studentsWindowFactory;
         _serviceProvider = serviceProvider;
+        _teacherViewModelFactory = teacherViewModelFactory;
     }
 
     public void OpenGroupsWindow(Course selectedCourse)
@@ -34,6 +40,42 @@ public class WindowService : IWindowService
         var groupsWindow = _groupsWindowFactory.Create(selectedCourse, this);
         groupsWindow.Show();
         groupsWindow.Focus();
+    }
+
+    public bool OpenTeacherDialog(Teacher teacher, string title)
+    {
+        var teacherViewModel = _teacherViewModelFactory.Create(this, teacher);
+        //= new TeacherViewModel(_windowService, _teacherService, _courseService, teacher);
+
+        var activeWindow = Application.Current.Windows
+          .OfType<Window>()
+          .FirstOrDefault(w => w.IsActive);
+
+        var teacherEditWindow = new TeacherWindow
+        {
+            Title = title,
+            DataContext = teacherViewModel,
+            Owner = activeWindow
+        };
+
+        bool result = false;
+        teacherViewModel.CloseRequested += (isSaved) =>
+        {
+            result = isSaved;
+            teacherEditWindow.Close();
+        };
+
+        teacherEditWindow.ShowDialog();
+
+        return result;
+    }
+
+    public void OpenTeachersWindow()
+    {
+        var courseWindow = _serviceProvider.GetRequiredService<TeachersWindow>();
+        var viewModel = _serviceProvider.GetRequiredService<TeachersViewModel>();
+        courseWindow.DataContext = viewModel;
+        courseWindow.ShowDialog();
     }
 
     public void OpenAddCourseWindow()
@@ -87,7 +129,7 @@ public class WindowService : IWindowService
         return result;
     }
 
-    public void ShowErrorDialog(string message, string title)
+    public void ShowMessageDialog(string message, string title)
     {
         var errorDialog = _serviceProvider.GetRequiredService<ErrorDialog>();
         var viewModel = _serviceProvider.GetRequiredService<ErrorDialogViewModel>();
@@ -150,5 +192,47 @@ public class WindowService : IWindowService
         viewModel.SetStudent(student);
         studentWindow.DataContext = viewModel;
         studentWindow.ShowDialog();
+    }
+
+    public Task<string> ShowSaveFileDialogAsync(string filter, string title)
+    {
+        var tcs = new TaskCompletionSource<string>();
+
+        Application.Current.Dispatcher.Invoke(() =>
+        {
+            SaveFileDialog saveFileDialog = new SaveFileDialog
+            {
+                Filter = filter,
+                Title = title
+            };
+            bool? result = saveFileDialog.ShowDialog();
+            if (result == true)
+                tcs.SetResult(saveFileDialog.FileName);
+            else
+                tcs.SetResult(null);
+        });
+
+        return tcs.Task;
+    }
+
+    public Task<string> ShowOpenFileDialogAsync(string filter, string title)
+    {
+        var tcs = new TaskCompletionSource<string>();
+
+        Application.Current.Dispatcher.Invoke(() =>
+        {
+            OpenFileDialog openFileDialog = new OpenFileDialog
+            {
+                Filter = filter,
+                Title = title
+            };
+            bool? result = openFileDialog.ShowDialog();
+            if (result == true)
+                tcs.SetResult(openFileDialog.FileName);
+            else
+                tcs.SetResult(null);
+        });
+
+        return tcs.Task;
     }
 }

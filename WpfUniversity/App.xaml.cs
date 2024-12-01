@@ -17,10 +17,12 @@ using WpfUniversity.ViewModels.Courses;
 using WpfUniversity.ViewModels.Dialogs;
 using WpfUniversity.ViewModels.Groups;
 using WpfUniversity.ViewModels.Students;
+using WpfUniversity.ViewModels.Teachers;
 using WpfUniversity.Views.Courses;
 using WpfUniversity.Views.Dialogs;
 using WpfUniversity.Views.Groups;
 using WpfUniversity.Views.Students;
+using WpfUniversity.Views.Teachers;
 using WpfUniversity.WindowFactories;
 using WpfUniversity.WindowFactories.Interfaces;
 
@@ -70,6 +72,7 @@ namespace WpfUniversity
                      services.AddTransient<StudentViewModel>();
                      services.AddTransient<ConfirmationDialogViewModel>();
                      services.AddTransient<ErrorDialogViewModel>();
+                     services.AddTransient<TeachersViewModel>();
 
                      // Views
                      services.AddTransient<MainWindow>();
@@ -78,6 +81,7 @@ namespace WpfUniversity
                      services.AddTransient<GroupWindow>();
                      services.AddTransient<StudentsWindow>();
                      services.AddTransient<StudentWindow>();
+                     services.AddTransient<TeachersWindow>();
 
                      // Dialogs
                      services.AddTransient<ConfirmationDialog>();
@@ -88,6 +92,7 @@ namespace WpfUniversity
                      services.AddTransient<IGroupsWindowFactory, GroupsWindowFactory>();
                      services.AddTransient<IStudentsViewModelFactory, StudentsViewModelFactory>();
                      services.AddTransient<IStudentsWindowFactory, StudentsWindowFactory>();
+                     services.AddTransient<ITeacherViewModelFactory, TeacherViewModelFactory>();
                  })
                 .Build();
         }

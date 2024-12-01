@@ -56,4 +56,14 @@ public class CourseService : ICourseService
         _unitOfWork.CourseRepository.Remove(course);
         _unitOfWork.Commit();
     }
+
+    public async Task<IEnumerable<Course>> GetAllCoursesAsync()
+    {
+        return await _unitOfWork.CourseRepository.GetAsync();
+    }
+
+    public async Task<Course> GetCourseByIdAsync(int id)
+    {
+        return await Task.Run(() => _unitOfWork.CourseRepository.GetById(id));
+    }
 }

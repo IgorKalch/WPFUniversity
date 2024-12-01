@@ -31,4 +31,37 @@ public class TeacherService : ITeacherService
 
         return result;
     }
+
+    public async Task<IEnumerable<Teacher>> GetAllTeachersAsync()
+    {
+        return await _unitOfWork.TeacherRepository.GetAsync();
+
+    }
+
+    public async Task<Teacher> GetTeacherByIdAsync(int id)
+    {
+        return await Task.Run(() => _unitOfWork.TeacherRepository.GetById(id));
+    }
+
+    public async Task AddTeacherAsync(Teacher teacher)
+    {
+        _unitOfWork.TeacherRepository.Add(teacher);
+        await _unitOfWork.CommitAsync();
+    }
+
+    public async Task UpdateTeacherAsync(Teacher teacher)
+    {
+        _unitOfWork.TeacherRepository.Update(teacher);
+        await _unitOfWork.CommitAsync();
+    }
+
+    public async Task DeleteTeacherAsync(int id)
+    {
+        var teacher = _unitOfWork.TeacherRepository.GetById(id);
+        if (teacher != null)
+        {
+            _unitOfWork.TeacherRepository.Remove(teacher);
+            await _unitOfWork.CommitAsync();
+        }
+    }
 }

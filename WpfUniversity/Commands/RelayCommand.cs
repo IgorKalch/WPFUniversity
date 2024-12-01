@@ -113,5 +113,5 @@ public class AsyncRelayCommand : ICommand
 
     public event EventHandler? CanExecuteChanged;
 
-    private void RaiseCanExecuteChanged() => CanExecuteChanged?.Invoke(this, EventArgs.Empty);
+    public void RaiseCanExecuteChanged() => CanExecuteChanged?.Invoke(this, EventArgs.Empty);
 }

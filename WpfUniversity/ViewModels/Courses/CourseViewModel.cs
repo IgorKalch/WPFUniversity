@@ -50,7 +50,7 @@ public class CourseViewModel : ViewModelBase
         {
             if (string.IsNullOrWhiteSpace(Name))
             {
-                _windowService.ShowErrorDialog("Name is required.", "Error");
+                _windowService.ShowMessageDialog("Name is required.", "Error");
                 return;
             }
 
@@ -77,7 +77,7 @@ public class CourseViewModel : ViewModelBase
         }
         catch (Exception ex)
         {
-            _windowService.ShowErrorDialog($"{ex.Message}", "Error");
+            _windowService.ShowMessageDialog($"{ex.Message}", "Error");
         }
     }
 

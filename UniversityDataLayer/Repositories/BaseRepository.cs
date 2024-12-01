@@ -74,4 +74,9 @@ public abstract class BaseRepository<T> : IRepository<T> where T : Entity
     {
         _dbSet.Remove(entity);
     }
+
+    public virtual void RemoveRange(IEnumerable<T> entities)
+    {
+        _dbSet.RemoveRange(entities);
+    }
 }

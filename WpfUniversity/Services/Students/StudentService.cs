@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using UniversityDataLayer.Entities;
 using UniversityDataLayer.UnitOfWorks;
@@ -29,6 +30,25 @@ public class StudentService : IStudentService
             var studentToAdd = _unitOfWork.StudentRepository.GetById(student.Id);
             Students.Add(studentToAdd);
         }
+    }
+
+    public IEnumerable<Student> GetStudentsByGroup(int groupId)
+    {
+        return _unitOfWork.StudentRepository.Get(s => s.GroupId == groupId).ToList();
+    }
+
+    public void AddStudentToGroup(int groupId, Student student)
+    {
+        student.GroupId = groupId;
+        _unitOfWork.StudentRepository.Add(student);
+        _unitOfWork.Commit();
+    }
+
+    public void ClearStudentsInGroup(int groupId)
+    {
+        var students = _unitOfWork.StudentRepository.Get(s => s.GroupId == groupId);
+        _unitOfWork.StudentRepository.RemoveRange(students);
+        _unitOfWork.Commit();
     }
 
     public async Task Add(Student student)

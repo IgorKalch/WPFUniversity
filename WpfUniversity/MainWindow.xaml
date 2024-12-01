@@ -4,9 +4,15 @@
     xmlns:views="clr-namespace:MvvmCross.Platforms.Wpf.Views;assembly=MvvmCross.Platforms.Wpf"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:viewmodels="clr-namespace:WpfUniversity.ViewModels"
-    xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
+    xmlns:i="http://schemas.microsoft.com/xaml/behaviors"    
+    xmlns:converters="clr-namespace:WpfUniversity.Converters"
     Title="Courses"
     SizeToContent="Height">
+
+    <views:MvxWindow.Resources>
+        <converters:RowNumberConverter x:Key="RowNumberConverter"/>
+    </views:MvxWindow.Resources>
+    
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
@@ -24,6 +30,7 @@
                     IsEnabled="{Binding IsCourseSelected}"/>
             <Button Content="Delete Course" Command="{Binding DeleteCourseCommand}" Margin="0,0,5,0"
                     IsEnabled="{Binding CanDeleteCourse}"/>
+            <Button Content="Manage Teachers" Command="{Binding OpenTeacherWindowCommand}" Margin="20,0,5,0"/>
         </StackPanel>
 
         <!-- DataGrid -->
@@ -43,7 +50,25 @@
                 </i:EventTrigger>
             </i:Interaction.Triggers>
             <DataGrid.Columns>
-                <DataGridTextColumn Header="ID" Binding="{Binding Id}" Width="Auto"/>
+                <DataGridTemplateColumn Header="#" Width="Auto" IsReadOnly="True" SortMemberPath="Id">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <TextBlock FontWeight="Bold" HorizontalAlignment="Center">
+                                <TextBlock.Text>
+                                    <MultiBinding Converter="{StaticResource RowNumberConverter}">
+                                        <!-- Bind to the DataGridRow -->
+                                        <Binding RelativeSource="{RelativeSource AncestorType=DataGridRow}" />
+                                        <!-- Bind to Current Page -->
+                                        <Binding Path="DataContext.CurrentPageCourses" RelativeSource="{RelativeSource AncestorType=DataGrid}" />
+                                        <!-- Bind to Page Size -->
+                                        <Binding Path="DataContext.PageSizeCourses" RelativeSource="{RelativeSource AncestorType=DataGrid}" />
+                                    </MultiBinding>
+                                </TextBlock.Text>
+                            </TextBlock>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+
                 <DataGridTextColumn Header="Name" Binding="{Binding Name}" Width="*"/>
                 <DataGridTextColumn Header="Description" Binding="{Binding Description}" Width="2*"/>
             </DataGrid.Columns>

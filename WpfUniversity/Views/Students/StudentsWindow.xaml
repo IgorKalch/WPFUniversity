@@ -5,10 +5,15 @@
                xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
                xmlns:views="clr-namespace:MvvmCross.Platforms.Wpf.Views;assembly=MvvmCross.Platforms.Wpf"
                xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
+               xmlns:converters="clr-namespace:WpfUniversity.Converters"
                mc:Ignorable="d"
                Title="StudentsWindow" 
                SizeToContent="Height"
                Width="800">
+    <views:MvxWindow.Resources>
+        <converters:RowNumberConverter x:Key="RowNumberConverter"/>
+        <converters:InverseBooleanConverter x:Key="InverseBooleanConverter"/>
+    </views:MvxWindow.Resources>
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
@@ -24,7 +29,7 @@
             
             <TextBlock FontSize="20" FontWeight="Bold"
                Text="{Binding Group.Name, StringFormat=Students in Group: {0}}"/>
-            <TextBlock Text="{Binding StudentsCount, StringFormat=Students count: {0}}" FontSize="14" TextWrapping="Wrap"/>            
+            <TextBlock Text="{Binding Students.Count, StringFormat=Students count: {0}}" FontSize="14" TextWrapping="Wrap"/>            
         </StackPanel>
 
         <!-- DataGrid Section -->
@@ -33,7 +38,8 @@
                   AutoGenerateColumns="False" 
                   Grid.Row="1"
                   IsReadOnly="True"
-                  CanUserSortColumns="True">
+                  CanUserSortColumns="True"
+                  AlternationCount="1000">
             <i:Interaction.Triggers>
                 <!-- Sorting Trigger -->
                 <i:EventTrigger EventName="Sorting">
@@ -42,7 +48,25 @@
                 </i:EventTrigger>
             </i:Interaction.Triggers>
             <DataGrid.Columns>
-                <DataGridTextColumn Header="ID" Binding="{Binding Id}" Width="Auto" SortMemberPath="Id"/>
+                <DataGridTemplateColumn Header="#" Width="Auto" IsReadOnly="True" SortMemberPath="Id">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <TextBlock FontWeight="Bold" HorizontalAlignment="Center">
+                                <TextBlock.Text>
+                                    <MultiBinding Converter="{StaticResource RowNumberConverter}">
+                                        <!-- Bind to the DataGridRow -->
+                                        <Binding RelativeSource="{RelativeSource AncestorType=DataGridRow}" />
+                                        <!-- Bind to Current Page -->
+                                        <Binding Path="DataContext.CurrentPageStudents" RelativeSource="{RelativeSource AncestorType=DataGrid}" />
+                                        <!-- Bind to Page Size -->
+                                        <Binding Path="DataContext.PageSizeStudents" RelativeSource="{RelativeSource AncestorType=DataGrid}" />
+                                    </MultiBinding>
+                                </TextBlock.Text>
+                            </TextBlock>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+
                 <DataGridTextColumn Header="First Name" Binding="{Binding FirstName}" Width="*" SortMemberPath="FirstName"/>
                 <DataGridTextColumn Header="Last Name" Binding="{Binding LastName}" Width="*" SortMemberPath="LastName"/>
             </DataGrid.Columns>
@@ -55,14 +79,20 @@
                 <Button Content="Add Student" Command="{Binding AddStudentCommand}" Width="100" Margin="0,0,5,0"/>
                 <Button Content="Edit Student" Command="{Binding EditStudentCommand}" Width="100" Margin="0,0,5,0"
                         IsEnabled="{Binding IsStudentSelected}"/>
-                <Button Content="Remove Student" Command="{Binding RemoveStudentCommand}" Width="100"
+                <Button Content="Remove Student" Command="{Binding RemoveStudentCommand}" Width="120"
                         IsEnabled="{Binding CanRemoveStudent}"/>
+                
+                <!-- Export and Import Buttons -->
+                <Button Content="Export" Command="{Binding ExportStudentsCommand}" Width="100" Margin="20,0,5,0"
+                         IsEnabled="{Binding IsBusy, Converter={StaticResource InverseBooleanConverter}}"/>
+                <Button Content="Import" Command="{Binding ImportStudentsCommand}" Width="100" Margin="0,0,5,0"
+                         IsEnabled="{Binding IsBusy, Converter={StaticResource InverseBooleanConverter}}"/>
             </StackPanel>
 
             <!-- Pagination Controls -->
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
                 <Button Content="Previous" Command="{Binding PreviousPageStudentsCommand}" 
-                        IsEnabled="{Binding CanGoToPreviousPageStudents}" Width="80" Margin="5,0"/>
+                        IsEnabled="{Binding CanGoToPreviousPageStudents}" Width="100" Margin="5,0"/>
                 <TextBlock Text="Page" VerticalAlignment="Center" Margin="10,0"/>
                 <TextBlock Text="{Binding CurrentPageStudents}" VerticalAlignment="Center" FontWeight="Bold"/>
                 <Button Content="Next" Command="{Binding NextPageStudentsCommand}" 

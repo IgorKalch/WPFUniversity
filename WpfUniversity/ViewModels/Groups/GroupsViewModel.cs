@@ -1,4 +1,7 @@
-﻿using System.Collections.Generic;
+﻿using MigraDocCore.DocumentObjectModel;
+using MigraDocCore.Rendering;
+using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
@@ -8,6 +11,8 @@ using System.Windows.Input;
 using UniversityDataLayer.Entities;
 using WpfUniversity.Commands;
 using WpfUniversity.Services.Interfaces;
+using Xceed.Document.NET;
+using Xceed.Words.NET;
 
 namespace WpfUniversity.ViewModels.Groups;
 public class GroupsViewModel : ViewModelBase
@@ -15,6 +20,15 @@ public class GroupsViewModel : ViewModelBase
     private readonly IGroupService _groupService;
     private readonly ITeacherService _teacherService;
     private readonly IWindowService _windowService;
+
+    private int _currentPageGroups = 1;
+    private int _itemsPerPageGroups = 20;
+    private int _totalGroups;
+    private Group _selectedGroup;
+
+    private string _sortColumn;
+    private bool _sortAscending = true;
+    private bool _isBusy;
 
     public GroupsViewModel(IGroupService groupService, IWindowService windowService, ITeacherService teacherService, Course course)
     {
@@ -37,12 +51,29 @@ public class GroupsViewModel : ViewModelBase
         OpenStudentsCommand = new RelayCommand<Group>(OpenStudents);
 
         SortCommand = new RelayCommand<DataGridSortingEventArgs>(OnSortCommandExecuted);
+
+        ExportToDocxCommand = new AsyncRelayCommand(ExportToDocxAsync, () => !IsBusy);
+        ExportToPdfCommand = new AsyncRelayCommand(ExportToPdfAsync, () => !IsBusy);
+
+    }
+
+    #region Public Properties
+    public bool IsBusy
+    {
+        get => _isBusy;
+        set
+        {
+            if (SetProperty(ref _isBusy, value))
+            {
+                ((AsyncRelayCommand)ExportToDocxCommand).RaiseCanExecuteChanged();
+                ((AsyncRelayCommand)ExportToPdfCommand).RaiseCanExecuteChanged();
+            }
+        }
     }
     public Course Course { get; }
 
     public ObservableCollection<Group> Groups { get; set; }
 
-    private Group _selectedGroup;
     public Group SelectedGroup
     {
         get => _selectedGroup;
@@ -74,9 +105,6 @@ public class GroupsViewModel : ViewModelBase
         }
     }
 
-    private string _sortColumn;
-    private bool _sortAscending = true;
-
     public string SortColumn
     {
         get => _sortColumn;
@@ -103,9 +131,17 @@ public class GroupsViewModel : ViewModelBase
         }
     }
 
-    private int _currentPageGroups = 1;
-    private int _itemsPerPageGroups = 20;
-    private int _totalGroups;
+    public int PageSizeGroups
+    {
+        get => _itemsPerPageGroups;
+        set
+        {
+            if (SetProperty(ref _itemsPerPageGroups, value))
+            {
+                UpdateGroupsCollection();
+            }
+        }
+    }
 
     public int CurrentPageGroups
     {
@@ -122,6 +158,10 @@ public class GroupsViewModel : ViewModelBase
     public bool CanGoToNextPageGroups => _currentPageGroups * _itemsPerPageGroups < _totalGroups;
     public bool CanGoToPreviousPageGroups => _currentPageGroups > 1;
 
+    #endregion
+
+    #region Commands
+
     public ICommand LoadGroupsCommand { get; }
     public ICommand NextPageGroupsCommand { get; }
     public ICommand PreviousPageGroupsCommand { get; }
@@ -134,6 +174,11 @@ public class GroupsViewModel : ViewModelBase
 
     public ICommand SortCommand { get; }
 
+    public ICommand ExportToDocxCommand { get; }
+    public ICommand ExportToPdfCommand { get; }
+
+    #endregion
+
     public async Task LoadGroups()
     {
         await _groupService.LoadGroupsByCourseId(Course.Id);
@@ -145,6 +190,136 @@ public class GroupsViewModel : ViewModelBase
     public async Task LoadTeachers()
     {
         await _teacherService.GetAllTeachersByCourseIdAsync(Course.Id);
+    }
+
+    #region Private Metods
+    private async Task ExportToDocxAsync()
+    {
+        if (IsBusy)
+            return;
+
+        try
+        {
+            IsBusy = true;
+
+            string filePath = await _windowService.ShowSaveFileDialogAsync("DOCX Files (*.docx)|*.docx", "Export Group to DOCX");
+
+            if (string.IsNullOrEmpty(filePath))
+                return;
+
+            using (var doc = DocX.Create(filePath))
+            {
+                var title = doc.InsertParagraph();
+                title.AppendLine("Group Report")
+                     .FontSize(20)
+                     .Bold()
+                     .Alignment = Alignment.center;
+
+                doc.InsertParagraph($"Course Name: {Course.Name}")
+                   .FontSize(14)
+                   .SpacingAfter(10);
+
+                doc.InsertParagraph($"Group Name: {SelectedGroup.Name}")
+                   .FontSize(14)
+                   .SpacingAfter(20);
+
+                doc.InsertParagraph($"List of Students:")
+                   .FontSize(12)
+                   .SpacingAfter(10);
+
+                var list = doc.AddList(listType: ListItemType.Numbered);
+                foreach (var student in SelectedGroup.Students)
+                {
+                    doc.AddListItem(list, $"{student.FirstName} {student.LastName}");
+                }
+                doc.InsertList(list);
+
+                doc.Save();
+            }
+
+            _windowService.ShowMessageDialog("Group exported to DOCX successfully.", "Export Complete");
+        }
+        catch (Exception ex)
+        {
+            _windowService.ShowMessageDialog($"Error exporting to DOCX: {ex.Message}", "Export Error");
+        }
+        finally
+        {
+            IsBusy = false;
+        }
+    }
+
+    private async Task ExportToPdfAsync()
+    {
+        if (IsBusy)
+            return;
+
+        try
+        {
+            IsBusy = true;
+
+            string filePath = await _windowService.ShowSaveFileDialogAsync("PDF Files (*.pdf)|*.pdf", "Export Group to PDF");
+
+            if (string.IsNullOrEmpty(filePath))
+                return;
+
+            var document = new MigraDocCore.DocumentObjectModel.Document();
+            document.Info.Title = "Group Report";
+            document.Info.Subject = $"Course: {Course.Name}, Group: {SelectedGroup.Name}";
+            document.Info.Author = "WpfUniversity Application";
+
+            var style = document.Styles["Normal"];
+            style.Font.Name = "Verdana";
+
+            var section = document.AddSection();
+            var title = section.AddParagraph("Group Report");
+            title.Format.Font.Size = 20;
+            title.Format.Font.Bold = true;
+            title.Format.Alignment = ParagraphAlignment.Center;
+
+            var course = section.AddParagraph($"Course Name: {Course.Name}");
+            course.Format.Font.Size = 14;
+            course.Format.SpaceAfter = "0.5cm";
+
+            var group = section.AddParagraph($"Group Name: {SelectedGroup.Name}");
+            group.Format.Font.Size = 14;
+            group.Format.SpaceAfter = "1cm";
+
+            var list = section.AddParagraph($"List of Students:");
+            list.Format.Font.Size = 12;
+            list.Format.SpaceAfter = "0.5cm";
+
+            foreach (var student in SelectedGroup.Students)
+            {
+                var paragraph = section.AddParagraph($"{student.FirstName} {student.LastName}");
+                paragraph.Format.Font.Size = 10;
+                paragraph.Format.LeftIndent = Unit.FromCentimeter(1);
+                paragraph.Format.SpaceAfter = Unit.FromCentimeter(0.2);
+
+                paragraph.Format.ListInfo = new ListInfo
+                {
+                    ListType = ListType.NumberList1,
+                    ContinuePreviousList = true,
+                };
+            }
+
+            var renderer = new PdfDocumentRenderer(true)
+            {
+                Document = document
+            };
+            renderer.RenderDocument();
+            renderer.PdfDocument.Save(filePath);
+
+            _windowService.ShowMessageDialog("Group exported to PDF successfully.", "Export Complete");
+        }
+        catch (Exception ex)
+        {
+            _windowService.ShowMessageDialog($"Error exporting to PDF: {ex.Message}", "Export Error");
+        }
+        finally
+        {
+            IsBusy = false;
+        }
     }
 
     private void UpdateGroupsCollection()
@@ -261,4 +436,5 @@ public class GroupsViewModel : ViewModelBase
 
         UpdateGroupsCollection();
     }
+    #endregion
 }

@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
@@ -35,6 +36,9 @@ public class MainViewModel : ViewModelBase
 
         OpenGroupsCommand = new RelayCommand(OpenGroups, () => SelectedCourse != null);
         SortCommand = new RelayCommand<DataGridSortingEventArgs>(OnSortCommandExecuted);
+
+        OpenTeacherWindowCommand = new RelayCommand(OpenTeachersWindowAsync);
+
     }
 
     public ObservableCollection<Course> Courses { get; set; }
@@ -104,7 +108,17 @@ public class MainViewModel : ViewModelBase
     private int _currentPageCourses = 1;
     private int _itemsPerPageCourses = 20;
     private int _totalCourses;
-
+    public int PageSizeCourses
+    {
+        get => _itemsPerPageCourses;
+        set
+        {
+            if (SetProperty(ref _itemsPerPageCourses, value))
+            {
+                UpdateCoursesCollection();
+            }
+        }
+    }
     public int CurrentPageCourses
     {
         get => _currentPageCourses;
@@ -128,6 +142,7 @@ public class MainViewModel : ViewModelBase
     public ICommand AddCourseCommand { get; }
     public ICommand EditCourseCommand { get; }
     public ICommand DeleteCourseCommand { get; }
+    public ICommand OpenTeacherWindowCommand { get; }
 
     public async Task LoadCourses()
     {
@@ -249,6 +264,17 @@ public class MainViewModel : ViewModelBase
         {
             _courseService.Delete(SelectedCourse);
             LoadCoursesCommand.Execute(null);
+        }
+    }
+    private void OpenTeachersWindowAsync()
+    {
+        try
+        {
+            _windowService.OpenTeachersWindow();
+        }
+        catch (Exception ex)
+        {
+            _windowService.ShowMessageDialog($"Error opening Teacher Window: {ex.Message}", "Error");
         }
     }
 }
