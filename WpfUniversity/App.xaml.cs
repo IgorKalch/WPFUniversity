@@ -37,9 +37,11 @@ namespace WpfUniversity
             AppHost = Host.CreateDefaultBuilder()
                 .ConfigureAppConfiguration((hostingContext, config) =>
                 {
+                    var environment = Environment.GetEnvironmentVariable("DOTNET_ENVIRONMENT");
+
                     config.SetBasePath(Directory.GetCurrentDirectory())
-                         //.AddJsonFile($"appsettings.json")
-                         .AddJsonFile($"appsettings.{hostingContext.HostingEnvironment.EnvironmentName}.json")
+                         .AddJsonFile($"appsettings.json", optional: false, reloadOnChange: true)
+                         //.AddJsonFile($"appsettings.{environment}.json", optional: true)
                          .AddEnvironmentVariables();
 
                 })

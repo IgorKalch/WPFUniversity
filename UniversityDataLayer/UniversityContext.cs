@@ -1,5 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using UniversityDataLayer.Configurations;
+using System.Reflection;
 
 namespace UniversityDataLayer;
 
@@ -12,14 +12,11 @@ public class UniversityContext : DbContext
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
+        modelBuilder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
 
-        modelBuilder.ApplyConfiguration(new GroupConfiguration());
-        modelBuilder.ApplyConfiguration(new StudentConfiguration());
-        modelBuilder.ApplyConfiguration(new CourseConfiguration());
-        modelBuilder.ApplyConfiguration(new TeacherConfiguration());
+        ApplyEntityConfigurations(modelBuilder);
+
     }
-
-    // todo: does not work after updating all nuget packages and upgrading to .net 8.0  
     private void ApplyEntityConfigurations(ModelBuilder modelBuilder)
     {
         var entityTypeConfigurationType = typeof(IEntityTypeConfiguration<>);

@@ -27,7 +27,7 @@ public class StudentsViewModel : ViewModelBase
     private Group _group;
     private bool _isBusy;
 
-    public StudentsViewModel(IStudentService studentService, IWindowService windowService, Group group)
+    public StudentsViewModel(IStudentService studentService, IWindowService windowService)
     {
         _studentService = studentService;
         _windowService = windowService;
@@ -35,7 +35,6 @@ public class StudentsViewModel : ViewModelBase
 
         LoadStudentsCommand = new AsyncRelayCommand(LoadStudents);
 
-        Group = group;
         NextPageStudentsCommand = new RelayCommand(NextPageStudents, () => CanGoToNextPageStudents);
         PreviousPageStudentsCommand = new RelayCommand(PreviousPageStudents, () => CanGoToPreviousPageStudents);
 
@@ -183,6 +182,12 @@ public class StudentsViewModel : ViewModelBase
     public ICommand ExportStudentsCommand { get; }
     public ICommand ImportStudentsCommand { get; }
     #endregion
+
+    public void Initialize(Group group)
+    {
+        _group = group;
+        LoadStudentsCommand.Execute(this);
+    }
 
     #region Private Metods
     private void UpdateStudentsCollection()

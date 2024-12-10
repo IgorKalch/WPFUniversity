@@ -70,7 +70,6 @@ public class MainViewModel : ViewModelBase
                 return false;
 
             var isHasGroup = SelectedCourse.Groups?.Any() ?? false;
-            //_groupService.HasGroups(SelectedCourse.Id);
 
             return !isHasGroup;
         }

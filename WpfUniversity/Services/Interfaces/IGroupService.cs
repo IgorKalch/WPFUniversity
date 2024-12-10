@@ -11,6 +11,5 @@ public interface IGroupService
     Task Update(Group group);
     Task Delete(Group group);
     Task LoadGroupsByCourseId(int courseId);
-    bool HasGroups(int courseId);
     Task<bool> IsGroupNameUniqueAsync(string name, int? groupId = null);
 }

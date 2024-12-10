@@ -20,11 +20,6 @@ public class GroupService : IGroupService
         _unitOfWork = unitOfWork;
     }
 
-    public bool HasGroups(int courseId)
-    {
-        return _unitOfWork.GroupRepository.Get(g => g.CourseId == courseId).Any();
-    }
-
     public async Task LoadGroupsByCourseId(int courseId)
     {
         Groups.Clear();

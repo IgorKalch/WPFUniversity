@@ -69,9 +69,9 @@
                     </DataGridTemplateColumn.CellTemplate>
                 </DataGridTemplateColumn>
 
-                <DataGridTextColumn Header="Full Name" Binding="{Binding FullName}" Width="*"/>
-                <DataGridTextColumn Header="Subject" Binding="{Binding Subject}" Width="*"/>
-                <DataGridTextColumn Header="Course" Binding="{Binding Course.Name}" Width="*"/>
+                <DataGridTextColumn Header="Full Name" Binding="{Binding FullName}" Width="Auto"/>
+                <DataGridTextColumn Header="Subject" Binding="{Binding Subject}" Width="Auto"/>
+                <DataGridTextColumn Header="Course" Binding="{Binding Course.Name}" Width="Auto"/>
             </DataGrid.Columns>
         </DataGrid>
 

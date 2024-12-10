@@ -30,15 +30,13 @@ public class GroupsViewModel : ViewModelBase
     private bool _sortAscending = true;
     private bool _isBusy;
 
-    public GroupsViewModel(IGroupService groupService, IWindowService windowService, ITeacherService teacherService, Course course)
+    public GroupsViewModel(IGroupService groupService, IWindowService windowService, ITeacherService teacherService)
     {
         _groupService = groupService;
         _windowService = windowService;
         _teacherService = teacherService;
 
-        Course = course;
         Groups = new ObservableCollection<Group>();
-        LoadGroups();
 
         LoadGroupsCommand = new AsyncRelayCommand(LoadGroups);
         NextPageGroupsCommand = new RelayCommand(NextPageGroups, () => CanGoToNextPageGroups);
@@ -70,7 +68,7 @@ public class GroupsViewModel : ViewModelBase
             }
         }
     }
-    public Course Course { get; }
+    public Course Course { get; set; }
 
     public ObservableCollection<Group> Groups { get; set; }
 
@@ -179,8 +177,18 @@ public class GroupsViewModel : ViewModelBase
 
     #endregion
 
+    public void Initialize(Course course)
+    {
+        Course = course;
+        LoadGroupsCommand.Execute(this);
+
+    }
+
     public async Task LoadGroups()
     {
+        if (Course == null)
+            return;
+
         await _groupService.LoadGroupsByCourseId(Course.Id);
 
         _totalGroups = _groupService.Groups.Count;

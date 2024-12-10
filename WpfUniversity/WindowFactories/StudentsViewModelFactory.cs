@@ -16,6 +16,9 @@ public class StudentsViewModelFactory : IStudentsViewModelFactory
 
     public StudentsViewModel Create(Group selectedGroup, IWindowService windowService)
     {
-        return new StudentsViewModel(_studentService, windowService, selectedGroup);
+        var studentsViewModel = new StudentsViewModel(_studentService, windowService);
+        studentsViewModel.Initialize(selectedGroup);
+
+        return studentsViewModel;
     }
 }

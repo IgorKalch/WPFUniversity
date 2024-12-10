@@ -18,6 +18,9 @@ public class GroupsViewModelFactory : IGroupsViewModelFactory
 
     public GroupsViewModel Create(Course selectedCourse, IWindowService windowService)
     {
-        return new GroupsViewModel(_groupService, windowService, _teacherService, selectedCourse);
+        var groupsViewModel = new GroupsViewModel(_groupService, windowService, _teacherService);
+        groupsViewModel.Initialize(selectedCourse);
+
+        return groupsViewModel;
     }
 }
