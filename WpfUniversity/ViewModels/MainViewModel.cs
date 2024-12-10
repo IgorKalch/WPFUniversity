@@ -27,6 +27,7 @@ public class MainViewModel : ViewModelBase
         Courses = new ObservableCollection<Course>();
 
         LoadCoursesCommand = new AsyncRelayCommand(LoadCourses);
+        LoadCoursesCommand.Execute(this);
         NextPageCoursesCommand = new RelayCommand(NextPageCourses, () => CanGoToNextPageCourses);
         PreviousPageCoursesCommand = new RelayCommand(PreviousPageCourses, () => CanGoToPreviousPageCourses);
 
