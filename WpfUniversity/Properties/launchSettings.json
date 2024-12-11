@@ -1,0 +1,13 @@
+{
+  "profiles": {
+    "WpfUniversityProduction": {
+      "commandName": "Project"
+    },
+    "Development": {
+      "commandName": "Project",
+      "environmentVariables": {
+        "DOTNET_ENVIRONMENT": "Development"
+      }
+    }
+  }
+}
