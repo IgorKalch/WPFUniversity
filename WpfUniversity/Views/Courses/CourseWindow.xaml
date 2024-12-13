@@ -1,0 +1,27 @@
+﻿<views:MvxWindow
+    x:Class="WpfUniversity.Views.Courses.CourseWindow"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:views="clr-namespace:MvvmCross.Platforms.Wpf.Views;assembly=MvvmCross.Platforms.Wpf"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    Title="{Binding WindowTitle}"
+    SizeToContent="WidthAndHeight"
+    WindowStartupLocation="CenterOwner">
+    <Grid Margin="10">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <Label Content="Name:" Grid.Row="0" VerticalAlignment="Center"/>
+        <TextBox Text="{Binding Name}" Grid.Row="0" Margin="100,0,0,0" Width="200"/>
+
+        <Label Content="Description:" Grid.Row="1" VerticalAlignment="Center"/>
+        <TextBox Text="{Binding Description}" Grid.Row="1" Margin="100,0,0,0" Width="200" Height="100" TextWrapping="Wrap" AcceptsReturn="True"/>
+
+        <StackPanel Orientation="Horizontal" Grid.Row="2" HorizontalAlignment="Right" Margin="0,10,0,0">
+            <Button Content="Save" Command="{Binding SaveCommand}" Margin="0,0,5,0"/>
+            <Button Content="Cancel" Command="{Binding CancelCommand}"/>
+        </StackPanel>
+    </Grid>
+</views:MvxWindow>
